@@ -18,7 +18,6 @@ use Joomla\Utilities\ArrayHelper;
  */
 class TcTablecontent extends JTable
 {
-	
 	/**
 	 * Constructor
 	 *
@@ -115,7 +114,7 @@ class TcTablecontent extends JTable
 			{
 				foreach ($jaccess->getData() as $group => $allow)
 				{
-					$actions[$group] = ((bool)$allow);
+					$actions[$group] = ((bool) $allow);
 				}
 			}
 
@@ -137,8 +136,6 @@ class TcTablecontent extends JTable
 		{
 			$this->ordering = self::getNextOrder();
 		}
-		
-		
 
 		return parent::check();
 	}
@@ -279,7 +276,7 @@ class TcTablecontent extends JTable
 	{
 		$this->load($pk);
 		$result = parent::delete($pk);
-		
+
 		return $result;
 	}
 }

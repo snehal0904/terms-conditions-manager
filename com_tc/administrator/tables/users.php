@@ -17,7 +17,6 @@ defined('_JEXEC') or die;
  */
 class TcTableusers extends JTable
 {
-	
 	/**
 	 * Constructor
 	 *

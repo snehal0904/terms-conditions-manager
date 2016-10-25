@@ -47,7 +47,7 @@ class TcRouter extends JComponentRouterBase
 		{
 			$segments[] = $query['view'];
 			$view = $query['view'];
-			
+
 			unset($query['view']);
 		}
 

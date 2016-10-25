@@ -39,6 +39,7 @@ class JFormFieldModifiedby extends JFormField
 		$html   = array();
 		$user   = JFactory::getUser();
 		$html[] = '<input type="hidden" name="' . $this->name . '" value="' . $user->id . '" />';
+
 		if (!$this->hidden)
 		{
 			$html[] = "<div>" . $user->name . " (" . $user->username . ")</div>";

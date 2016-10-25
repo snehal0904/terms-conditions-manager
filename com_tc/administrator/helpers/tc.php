@@ -31,7 +31,6 @@ class TcHelpersTc
 			'index.php?option=com_tc&view=contents',
 			$vName == 'contents'
 		);
-
 	}
 
 	/**
@@ -88,7 +87,11 @@ class TcHelpersTc
 }
 
 
+/**
+ * Tc Listhelper.
+ * 
+ * @since  1.6
+ */
 class TcHelper extends TcHelpersTc
 {
-
 }

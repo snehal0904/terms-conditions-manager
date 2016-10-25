@@ -158,7 +158,8 @@ class TcModelContents extends JModelList
 			else
 			{
 				$search = $db->Quote('%' . $db->escape($search, true) . '%');
-				$query->where('( a.title LIKE ' . $search . '  OR  a.version LIKE ' . $search . '  OR  a.client LIKE ' . $search . '  OR  a.start_date LIKE ' . $search . ' )');
+				$query->where('( a.title LIKE ' . $search . '  OR  a.version LIKE
+				 ' . $search . '  OR  a.client LIKE ' . $search . '  OR  a.start_date LIKE ' . $search . ' )');
 			}
 		}
 
