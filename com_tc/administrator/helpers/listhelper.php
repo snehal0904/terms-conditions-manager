@@ -29,19 +29,27 @@ abstract class JHtmlListhelper
 	* 
 	* @since  1.6
 	*/
-	static function toggle($value = 0, $value, $field, $i)
+	public static function toggle($value , $value, $field, $i)
 	{
 		$states = array(
-			0 => array('icon-remove', JText::_('Toggle'), 'inactive btn-danger'),
-			1 => array('icon-checkmark', JText::_('Toggle'), 'active btn-success')
+		0 => array(
+		'icon-remove',
+		JText::_('Toggle'),
+		'inactive btn-danger'
+		),
+		1 => array(
+		'icon-checkmark',
+		JText::_('Toggle'),
+		'active btn-success'
+		)
 		);
 
-		$state  = \Joomla\Utilities\ArrayHelper::getValue($states, (int) $value, $states[0]);
-		$text   = '<span aria-hidden="true" class="' . $state[0] . '"></span>';
-		$html   = '<a href="#" class="btn btn-micro ' . $state[2] . '"';
-		$html  .= 'onclick="return toggleField(\'cb' . $i . '\',\'' . $view . '.toggle\',\'' . $field . '\')" title=
+		$state = \Joomla\Utilities\ArrayHelper::getValue($states, (int) $value, $states[0]);
+		$text  = '<span aria-hidden="true" class="' . $state[0] . '"></span>';
+		$html  = '<a href="#" class="btn btn-micro ' . $state[2] . '"';
+		$html .= 'onclick="return toggleField(\'cb' . $i . '\',\'' . $view . '.toggle\',\'' . $field . '\')" title=
 		"' . JText::_($state[1]) . '">' . $text . '</a>';
 
-		return $html;
+	return $html;
 	}
 }
