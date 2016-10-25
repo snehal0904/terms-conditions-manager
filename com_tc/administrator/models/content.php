@@ -166,7 +166,6 @@ class TcModelContent extends JModelAdmin
 				{
 					throw new Exception($table->getError());
 				}
-				
 
 				// Trigger the before save event.
 				$result = $dispatcher->trigger($this->event_before_save, array($context, &$table, true));
@@ -214,6 +213,94 @@ class TcModelContent extends JModelAdmin
 				$max             = $db->loadResult();
 				$table->ordering = $max + 1;
 			}
+		}
+	}
+
+	/**
+	 * Method to save the submitted ordering values for records via AJAX.
+	 *
+	 * @param   INT  $user_id  user ID
+	 *
+	 * @return  void
+	 *
+	 * @since   3.0
+	 */
+	public function getUserTc($user_id)
+	{
+		if ($user_id)
+		{
+			$db    = JFactory::getDBO();
+			$query = $db->getQuery(true);
+			$query->select('content_id');
+			$query->from($db->quoteName('#__tc_users') . 'as u');
+			$query->where('user_id = ' . $user_id);
+			$db->setQuery($query);
+
+			$res = $db->loadResult();
+
+			return $res;
+		}
+	}
+
+	/**
+	 * Method to save the submitted ordering values for records via AJAX.
+	 *
+	 * @param   INT  $client  client 
+	 * 
+	 * @return  void
+	 *
+	 * @since   3.0
+	 */
+	public function getCurrentTc($client)
+	{
+		if ($client)
+		{
+			$db    = JFactory::getDBO();
+			$query = $db->getQuery(true);
+			$query->select('id');
+			$query->from($db->quoteName('#__tc_content') . 'as u');
+			$query->where($db->quoteName('client') . ' = ' . $db->quote($client));
+			$query->where($db->quoteName('state') . ' = 1');
+			$query->order('id DESC');
+			$query->setLimit('1');
+			$db->setQuery($query);
+
+			$res = $db->loadObjectList();
+
+			return $res;
+		}
+	}
+
+	/**
+	 * Method to save the submitted ordering values for records via AJAX.
+	 * 
+	 * @param   INT  $userid   user ID
+	 * @param   INT  $version  latest client version
+	 *
+	 * @return  void
+	 *
+	 * @since   3.0
+	 */
+	public function storeUserTc($userid, $version)
+	{
+		if ($userid && $version)
+		{
+			$db                  = JFactory::getDBO();
+
+			// Load file to call api of the table
+			JTable::addIncludePath(JPATH_ADMINISTRATOR . '/components/com_tc/tables');
+
+			// First parameter file name and second parameter is prefix
+			$users_table = JTable::getInstance('users', 'TcTable', array('dbo', $db));
+
+			// Get jlike_remider_sent for per reminder Check if already reminder sent to the User
+			$users_table->load(array('user_id' => (int) $userid));
+			$users_table->content_id       = $version;
+			$users_table->user_id          = $userid;
+			$users_table->accepted_date    = new JDate('now');
+			$users_table->store();
+
+			return true;
 		}
 	}
 }

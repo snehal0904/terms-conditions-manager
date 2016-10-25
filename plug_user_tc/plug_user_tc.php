@@ -14,6 +14,7 @@
 defined('_JEXEC') or die( 'Restricted access');
 
 jimport('joomla.filesystem.file');
+jimport('joomla.application.application');
 jimport('joomla.html.parameter');
 jimport('joomla.plugin.plugin');
 
@@ -24,7 +25,6 @@ jimport('joomla.plugin.plugin');
  */
 class PlgUserplug_User_Tc extends JPlugin
 {
-
 	/**
 	 * Function used as a trigger after User login
 	 *
@@ -37,12 +37,27 @@ class PlgUserplug_User_Tc extends JPlugin
 	 */
 	public function onUserLogin($user, $options)
 	{
-		die("Deepali");
-		//GetUserTc($user_id) Get current terms & conditions accepted by the login user
-		
-		//CheckTCValidity($userid) Check if user accepted the current tc if not then show checkbox which will open model poup of t&c 
-		
-		// Store this in the #_tc_users table using StoreUserTc($userid,$version) 
+		$db	= JFactory::getDBO();
+		$query = "select id from #__users where email = '" . $user['email'] . "'";
+		$db->setQuery($query);
+		$user_id = $db->loadResult();
+
+		require_once JPATH_ADMINISTRATOR . '/components/com_tc/models/content.php';
+		$model              = JModelLegacy::getInstance('Content', 'TcModel');
+
+		// Call api to get user accepted version
+		$version            = $model->getUserTc($user_id);
+
+		// Call api to get client last craeted version
+		$client_version     = $model->getCurrentTc('com_tjlms');
+
+		if (empty($version) || $version != $client_version[0]->id)
+		{
+			$app = JFactory::getApplication();
+
+			// Redirect to Terms and condtitions view
+			$app->redirect(JRoute::_('index.php?option=com_tc&view=content&content_id=' . $client_version[0]->id . '&user_id=' . $user_id));
+		}
 
 		return true;
 	}
