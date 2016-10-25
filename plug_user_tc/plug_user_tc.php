@@ -28,7 +28,6 @@ class PlgUserplug_User_Tc extends JPlugin
 	/**
 	 * Function used as a trigger after User login
 	 *
-	 * @param   MIXED  $user     user ID
 	 * @param   MIXED  $options  Options available
 	 *
 	 * @return  boolean true or false
@@ -41,7 +40,7 @@ class PlgUserplug_User_Tc extends JPlugin
 		{
 			return true;
 		}
-		
+
 		require_once JPATH_ADMINISTRATOR . '/components/com_tc/models/content.php';
 		$model              = JModelLegacy::getInstance('Content', 'TcModel');
 
