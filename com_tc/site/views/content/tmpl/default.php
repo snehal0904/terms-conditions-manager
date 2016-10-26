@@ -12,8 +12,8 @@ defined('_JEXEC') or die('Restricted access');
 	
 	function validateform(form)
 	{
-		var content_id = <?php echo $this->content_id; ?>;
-		var user_id = <?php echo $this->user_id; ?>;
+		var content_id = <?php echo (int) $this->content_id; ?>;
+		var user_id = <?php echo (int) $this->user_id; ?>;
 		
 		if(jQuery("#agree").is(':checked') == true)
 		{
@@ -37,7 +37,8 @@ defined('_JEXEC') or die('Restricted access');
 		</div>
 		<div class="">
 	<?php
-	echo $this->termsandconditions->content;
+	
+	echo  html_entity_decode($this->termsandconditions->content);
 }
 ?>
 		</div>
