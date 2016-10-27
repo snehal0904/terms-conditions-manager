@@ -33,9 +33,10 @@ class TcViewContent extends JViewLegacy
 		$app        = JFactory::getApplication();
 		$input = JFactory::getApplication()->input;
 		$this->content_id = $input->get('content_id', '', 'INT');
+		$this->layout     = $input->get('layout', 'default', 'STRING');
 		$this->user_id    = JFactory::getUser()->id;
 
-		if (!$this->user_id)
+		if (!$this->user_id && $this->layout != 'terms')
 		{
 			$app->redirect(JRoute::_(JURI::base()));
 
