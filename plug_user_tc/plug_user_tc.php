@@ -28,25 +28,24 @@ class PlgUserplug_User_Tc extends JPlugin
 	/**
 	 * Function used as a trigger after User login
 	 *
-	 * @param   MIXED  $user     user ID
 	 * @param   MIXED  $options  Options available
 	 *
 	 * @return  boolean true or false
 	 *
 	 * @since  1.0.0
 	 */
-	public function onUserLogin($user, $options)
+	public function onUserAfterLogin($options)
 	{
-		$db	= JFactory::getDBO();
-		$query = "select id from #__users where email = '" . $user['email'] . "'";
-		$db->setQuery($query);
-		$user_id = $db->loadResult();
+		if ($options['action'] == 'core.login.admin')
+		{
+			return true;
+		}
 
 		require_once JPATH_ADMINISTRATOR . '/components/com_tc/models/content.php';
 		$model              = JModelLegacy::getInstance('Content', 'TcModel');
 
 		// Call api to get user accepted version
-		$version            = $model->getUserTc($user_id);
+		$version            = $model->getUserTc($options['user']->id);
 
 		// Call api to get client last craeted version
 		$client_version     = $model->getCurrentTc('com_tjlms');
@@ -56,7 +55,7 @@ class PlgUserplug_User_Tc extends JPlugin
 			$app = JFactory::getApplication();
 
 			// Redirect to Terms and condtitions view
-			$app->redirect(JRoute::_('index.php?option=com_tc&view=content&content_id=' . $client_version[0]->id . '&user_id=' . $user_id));
+			$app->redirect(JRoute::_(JURI::root() . 'index.php?option=com_tc&view=content&content_id=' . $client_version[0]->id));
 		}
 
 		return true;

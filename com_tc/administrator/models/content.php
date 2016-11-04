@@ -297,7 +297,8 @@ class TcModelContent extends JModelAdmin
 			$users_table->load(array('user_id' => (int) $userid));
 			$users_table->content_id       = $version;
 			$users_table->user_id          = $userid;
-			$users_table->accepted_date    = new JDate('now');
+			$date                          = JFactory::getDate('now');
+			$users_table->accepted_date    = $date->toSQL();
 			$users_table->store();
 
 			return true;

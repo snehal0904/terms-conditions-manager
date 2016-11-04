@@ -30,9 +30,18 @@ class TcViewContent extends JViewLegacy
 	 */
 	public function display($tpl = null)
 	{
+		$app        = JFactory::getApplication();
 		$input = JFactory::getApplication()->input;
 		$this->content_id = $input->get('content_id', '', 'INT');
-		$this->user_id    = $input->get('user_id', '', 'INT');
+		$this->layout     = $input->get('layout', 'default', 'STRING');
+		$this->user_id    = JFactory::getUser()->id;
+
+		if (!$this->user_id && $this->layout != 'terms')
+		{
+			$app->redirect(JRoute::_(JURI::base()));
+
+			return false;
+		}
 
 		require_once JPATH_ADMINISTRATOR . '/components/com_tc/models/content.php';
 
