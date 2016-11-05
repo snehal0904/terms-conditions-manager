@@ -68,8 +68,6 @@ class TcViewUsertcs extends JViewLegacy
 
 		JToolBarHelper::title(JText::_('COM_TC_TITLE_USERTCS'), 'usertcs.png');
 
-	
-
 		if ($canDo->get('core.edit.state'))
 		{
 			if (isset($this->items[0]))
