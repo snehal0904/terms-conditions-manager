@@ -51,6 +51,7 @@
         <submenu>
             
 			<menu link="option=com_tc&amp;view=contents" view="contents" img="media/com_tc/images/s_contents.png" alt="Tc/Contents">COM_TC_TITLE_CONTENTS</menu>
+			<menu link="option=com_tc&amp;view=usertcs" view="usertcs" img="media/com_tc/images/s_contents.png" alt="Tc/usertcs">COM_TC_TITLE_USERTCS</menu>
 
         </submenu>
         <files folder="administrator">

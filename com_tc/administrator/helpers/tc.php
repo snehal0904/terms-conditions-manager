@@ -31,6 +31,11 @@ class TcHelpersTc
 			'index.php?option=com_tc&view=contents',
 			$vName == 'contents'
 		);
+		JHtmlSidebar::addEntry(
+			JText::_('COM_TC_TITLE_USERTCS'),
+			'index.php?option=com_tc&view=usertcs',
+			$vName == 'usertcs'
+		);
 	}
 
 	/**
