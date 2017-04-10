@@ -214,7 +214,7 @@ class TcModelContents extends JModelList
 
 			$getLatest = array();
 
-			foreach($latestTCS as $tc)
+			foreach ($latestTCS as $tc)
 			{
 				array_push($getLatest, $tc);
 			}
