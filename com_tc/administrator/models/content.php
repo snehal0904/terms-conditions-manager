@@ -123,17 +123,15 @@ class TcModelContent extends JModelAdmin
 		if ($item = parent::getItem($pk))
 		{
 			// Do any procesing on fields here if needed
-			$pattern = array();
-			$db = JFactory::getDbo();
-			$query = $db->getQuery(true);
-			$query->select('*');
-			$query->from($db->quoteName('#__tc_patterns'));
-			$query->where($db->quoteName('tc_id') . " = " . $db->quote($item->tc_id));
 
-			$db->setQuery($query);
+			if ($item->tc_id)
+			{
+				require_once JPATH_ADMINISTRATOR . '/components/com_tc/models/urlpatterns.php';
 
-			$pattern = $db->loadObjectList();
-			$item->url_pattern = $pattern;
+				$urlPatternsModel = JModelLegacy::getInstance('urlpatterns', 'TcModel');
+
+				$item->url_pattern = $urlPatternsModel->getItems();
+			}
 
 			// Exploding user saved user groups.
 			$item->groups = explode(',', $item->groups);
