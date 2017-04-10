@@ -210,7 +210,16 @@ class TcModelContents extends JModelList
 
 		if ($show == 'latest')
 		{
-			return $this->getDbo()->loadObjectList('client');
+			$latestTCS = $this->getDbo()->loadObjectList('client');
+
+			$getLatest = array();
+
+			foreach($latestTCS as $tc)
+			{
+				array_push($getLatest, $tc);
+			}
+
+			return $getLatest;
 		}
 		else
 		{
