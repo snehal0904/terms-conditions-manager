@@ -91,6 +91,9 @@ class TcModelUrlpatterns extends JModelList
 	 */
 	protected function getListQuery()
 	{
+		// Get TC id for retrieving url patterns
+		$tcId = JRequest::getVar('tc_id');
+
 		// Create a new query object.
 		$db    = $this->getDbo();
 		$query = $db->getQuery(true);
@@ -102,6 +105,11 @@ class TcModelUrlpatterns extends JModelList
 			)
 		);
 		$query->from('#__tc_patterns');
+
+		if ($tcId)
+		{
+			$query->where('tc_id = ' . $tcId);
+		}
 
 		return $query;
 	}
