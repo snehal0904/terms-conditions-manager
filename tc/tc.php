@@ -89,13 +89,16 @@ class PlgSystemTc extends JPlugin
 				// Check if current url is mapped to this global TC
 				$isGlobalTCIdList = $model->getGlobalTCValidationStatus($getGlobalTCAcceptIdList[$i]->tc_id);
 
-				// If this is global TC and if this page is not be skipped, redirect to TC page
-				if ($option != 'com_tc' || $view != 'content' || $tc_id != $getGlobalTCAcceptIdList[$i]->tc_id)
+				if ($isGlobalTCIdList == '1')
 				{
-					$tc_url = 'index.php?option=com_tc&view=content&tc_id=';
+					// If this is global TC and if this page is not be skipped, redirect to TC page
+					if ($option != 'com_tc' || $view != 'content' || $tc_id != $getGlobalTCAcceptIdList[$i]->tc_id)
+					{
+						$tc_url = 'index.php?option=com_tc&view=content&tc_id=';
 
-					// Redirect to Terms and condtitions view
-					$this->app->redirect(JRoute::_(JURI::root() . $tc_url . $getGlobalTCAcceptIdList[$i]->tc_id . '&return=' . $url));
+						// Redirect to Terms and condtitions view
+						$this->app->redirect(JRoute::_(JURI::root() . $tc_url . $getGlobalTCAcceptIdList[$i]->tc_id . '&return=' . $url));
+					}
 				}
 			}
 		}
@@ -110,7 +113,7 @@ class PlgSystemTc extends JPlugin
 			{
 				for ($i = 0; $i < count($TCAcceptIdList); $i++)
 				{
-					echo $TCValidationInfo = $model->getTCValidationStatus($TCAcceptIdList[$i]->tc_id);
+					$TCValidationInfo = $model->getTCValidationStatus($TCAcceptIdList[$i]->tc_id);
 
 					if ($TCValidationInfo == '1')
 					{
