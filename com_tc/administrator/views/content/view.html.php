@@ -62,7 +62,7 @@ class TcViewContent extends JViewLegacy
 		JFactory::getApplication()->input->set('hidemainmenu', true);
 
 		$user  = JFactory::getUser();
-		$isNew = ($this->item->id == 0);
+		$isNew = ($this->item->tc_id == 0);
 
 		if (isset($this->item->checked_out))
 		{
@@ -89,19 +89,15 @@ class TcViewContent extends JViewLegacy
 			JToolBarHelper::custom('content.save2new', 'save-new.png', 'save-new_f2.png', 'JTOOLBAR_SAVE_AND_NEW', false);
 		}
 
-		// If an existing item, can save to a copy.
-		if (!$isNew && $canDo->get('core.create'))
-		{
-			JToolBarHelper::custom('content.save2copy', 'save-copy.png', 'save-copy_f2.png', 'JTOOLBAR_SAVE_AS_COPY', false);
-		}
+		// If an existing T&C, can save to a copy & upgrade version, - this task is under futurescope
+		/**
+		 * if (!$isNew && $canDo->get('core.create'))
+		 * {
+		 * JToolBarHelper::custom('content.save2copy', 'save-copy.png', 'save-copy_f2.png', 'JTOOLBAR_SAVE_AS_COPY', false);
+		 * }
+		 */
 
-		// Button for version control
-		if ($this->state->params->get('save_history', 1) && $user->authorise('core.edit'))
-		{
-			JToolbarHelper::versions('com_tc.content', $this->item->id);
-		}
-
-		if (empty($this->item->id))
+		if (empty($this->item->tc_id))
 		{
 			JToolBarHelper::cancel('content.cancel', 'JTOOLBAR_CANCEL');
 		}

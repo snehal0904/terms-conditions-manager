@@ -31,7 +31,7 @@ class TcModelUsertcs extends JModelList
 		if (empty($config['filter_fields']))
 		{
 			$config['filter_fields'] = array(
-				'id', 'a.`id`',
+				'tc_id', 'a.`tc_id`',
 				'user_id', 'a.`user_id`',
 				'name', 'uc.`name`',
 				'title', 'c.`title`',
@@ -110,13 +110,13 @@ class TcModelUsertcs extends JModelList
 		// Select the required fields from the table.
 		$query->select(
 			$this->getState(
-				'list.select', 'a.*,c.title,uc.name AS name,c.client'
+				'list.select', 'a.*,c.title,uc.name AS name,c.client,c.version'
 			)
 		);
-		$query->from('`#__tc_users` AS a');
+		$query->from('`#__tc_acceptance` AS a');
 
 		// Join over the user field 'created_by'
-		$query->join('LEFT', '#__tc_content AS `c` ON `c`.id = a.`content_id`');
+		$query->join('LEFT', '#__tc_content AS `c` ON `c`.tc_id = a.`tc_id`');
 
 		// Join over the users for the checked out user
 		$query->join("LEFT", "#__users AS uc ON uc.id=a.user_id");
@@ -128,9 +128,9 @@ class TcModelUsertcs extends JModelList
 
 		if (!empty($search))
 		{
-			if (stripos($search, 'id:') === 0)
+			if (stripos($search, 'tc_id:') === 0)
 			{
-				$query->where('a.id = ' . (int) substr($search, 3));
+				$query->where('a.tc_id = ' . (int) substr($search, 3));
 			}
 			else
 			{
@@ -164,6 +164,22 @@ class TcModelUsertcs extends JModelList
 	}
 
 	/**
+	 * Returns a reference to the a Table object, always creating it.
+	 *
+	 * @param   string  $type    The table type to instantiate
+	 * @param   string  $prefix  A prefix for the table class name. Optional.
+	 * @param   array   $config  Configuration array for model. Optional.
+	 *
+	 * @return    JTable    A database object
+	 *
+	 * @since    1.6
+	 */
+	public function getTable($type = 'usertcs', $prefix = 'TcTable', $config = array())
+	{
+		return JTable::getInstance($type, $prefix, $config);
+	}
+
+	/**
 	 * Delet attempts
 	 *
 	 * @param   ARRAY  $cid  array of lesson track id
@@ -184,10 +200,10 @@ class TcModelUsertcs extends JModelList
 
 			// Delete all orders as selected
 			$conditions = array(
-				$db->quoteName('id') . ' IN ( ' . $group_to_delet . ' )',
+				$db->quoteName('tc_id') . ' IN ( ' . $group_to_delet . ' )',
 			);
 
-			$query->delete($db->quoteName('#__tc_users'));
+			$query->delete($db->quoteName('#__tc_acceptance'));
 			$query->where($conditions);
 
 			$db->setQuery($query);
@@ -201,5 +217,52 @@ class TcModelUsertcs extends JModelList
 		}
 
 		return true;
+	}
+
+	/**
+	 * Method to save the user T&C acceptance entry.
+	 *
+	 * @param   INT     $userid     user id
+	 * @param   INT     $tcId       latest   client version
+	 * @param   STRING  $returnURL  original loaded page url
+	 *
+	 * @return  void
+	 *
+	 * @since   3.0
+	 */
+	public function save($userid, $tcId, $returnURL)
+	{
+		if ($userid && $tcId)
+		{
+			require_once JPATH_ADMINISTRATOR . '/components/com_tc/models/content.php';
+
+			$contentModel = JModelLegacy::getInstance('content', 'TcModel');
+
+			$tcClient = $contentModel->getTCClient($tcId);
+
+			$table = $this->getTable();
+
+			// TC accepted date time
+			$date = JHtml::date('now', 'Y-m-d H:i:s', true);
+
+			$tcURLObj = array();
+
+			$tcURLObj['tc_id'] = $tcId;
+			$tcURLObj['user_id'] = $userid;
+			$tcURLObj['client'] = $tcClient;
+			$tcURLObj['accepted_date'] = $date;
+			$tcURLObj['params'] = '';
+
+			$tcAcceptanceEntry = $table->save($tcURLObj);
+
+			if ($tcAcceptanceEntry == 1)
+			{
+				return $returnURL;
+			}
+			else
+			{
+				return false;
+			}
+		}
 	}
 }

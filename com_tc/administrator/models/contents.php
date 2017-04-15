@@ -31,7 +31,7 @@ class TcModelContents extends JModelList
 		if (empty($config['filter_fields']))
 		{
 			$config['filter_fields'] = array(
-				'id', 'a.`id`',
+				'tc_id', 'a.`tc_id`',
 				'ordering', 'a.`ordering`',
 				'state', 'a.`state`',
 				'created_by', 'a.`created_by`',
@@ -71,6 +71,9 @@ class TcModelContents extends JModelList
 		$published = $app->getUserStateFromRequest($this->context . '.filter.state', 'filter_published', '', 'string');
 		$this->setState('filter.state', $published);
 
+		$show = $app->getUserStateFromRequest($this->context . '.filter.show', 'filter_show', 'latest', 'string');
+		$this->setState('filter.show', $show);
+
 		// Load the parameters.
 		$params = JComponentHelper::getParams('com_tc');
 		$this->setState('params', $params);
@@ -99,6 +102,18 @@ class TcModelContents extends JModelList
 		$id .= ':' . $this->getState('filter.state');
 
 		return parent::getStoreId($id);
+	}
+
+	/**
+	 * Method to get an array of data items
+	 *
+	 * @return  mixed An array of data on success, false on failure.
+	 */
+	public function getItems()
+	{
+		$items = parent::getItems();
+
+		return $items;
 	}
 
 	/**
@@ -151,15 +166,15 @@ class TcModelContents extends JModelList
 
 		if (!empty($search))
 		{
-			if (stripos($search, 'id:') === 0)
+			if (stripos($search, 'tc_id:') === 0)
 			{
-				$query->where('a.id = ' . (int) substr($search, 3));
+				$query->where('a.tc_id = ' . (int) substr($search, 6));
 			}
 			else
 			{
 				$search = $db->Quote('%' . $db->escape($search, true) . '%');
 				$query->where('( a.title LIKE ' . $search . '  OR  a.version LIKE
-				 ' . $search . '  OR  a.client LIKE ' . $search . '  OR  a.start_date LIKE ' . $search . ' )');
+				 ' . $search . '  OR  a.client LIKE ' . $search . ' )');
 			}
 		}
 
@@ -176,14 +191,39 @@ class TcModelContents extends JModelList
 	}
 
 	/**
-	 * Get an array of data items
+	 * Gets an array of objects from the results of database query.
 	 *
-	 * @return mixed Array of data items on success, false on failure.
+	 * @param   string   $query       The query.
+	 * @param   integer  $limitstart  Offset.
+	 * @param   integer  $limit       The number of records.
+	 *
+	 * @return  object[]  An array of results.
+	 *
+	 * @since   12.2
+	 * @throws  RuntimeException
 	 */
-	public function getItems()
+	protected function _getList($query, $limitstart = 0, $limit = 0)
 	{
-		$items = parent::getItems();
+		$this->getDbo()->setQuery($query, $limitstart, $limit);
 
-		return $items;
+		$show = $this->getState('filter.show');
+
+		if ($show == 'latest')
+		{
+			$latestTCS = $this->getDbo()->loadObjectList('client');
+
+			$getLatest = array();
+
+			foreach ($latestTCS as $tc)
+			{
+				array_push($getLatest, $tc);
+			}
+
+			return $getLatest;
+		}
+		else
+		{
+			return $this->getDbo()->loadObjectList();
+		}
 	}
 }

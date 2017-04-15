@@ -123,71 +123,21 @@ class TcModelContent extends JModelAdmin
 		if ($item = parent::getItem($pk))
 		{
 			// Do any procesing on fields here if needed
+
+			if ($item->tc_id)
+			{
+				require_once JPATH_ADMINISTRATOR . '/components/com_tc/models/urlpatterns.php';
+
+				$urlPatternsModel = JModelLegacy::getInstance('urlpatterns', 'TcModel');
+
+				$item->url_pattern = $urlPatternsModel->getItems();
+			}
+
+			// Exploding user saved user groups.
+			$item->groups = explode(',', $item->groups);
 		}
 
 		return $item;
-	}
-
-	/**
-	 * Method to duplicate an Content
-	 *
-	 * @param   array  &$pks  An array of primary key IDs.
-	 *
-	 * @return  boolean  True if successful.
-	 *
-	 * @throws  Exception
-	 */
-	public function duplicate(&$pks)
-	{
-		$user = JFactory::getUser();
-
-		// Access checks.
-		if (!$user->authorise('core.create', 'com_tc'))
-		{
-			throw new Exception(JText::_('JERROR_CORE_CREATE_NOT_PERMITTED'));
-		}
-
-		$dispatcher = JEventDispatcher::getInstance();
-		$context    = $this->option . '.' . $this->name;
-
-		// Include the plugins for the save events.
-		JPluginHelper::importPlugin($this->events_map['save']);
-
-		$table = $this->getTable();
-
-		foreach ($pks as $pk)
-		{
-			if ($table->load($pk, true))
-			{
-				// Reset the id to create a new record.
-				$table->id = 0;
-
-				if (!$table->check())
-				{
-					throw new Exception($table->getError());
-				}
-
-				// Trigger the before save event.
-				$result = $dispatcher->trigger($this->event_before_save, array($context, &$table, true));
-
-				if (in_array(false, $result, true) || !$table->store())
-				{
-					throw new Exception($table->getError());
-				}
-
-				// Trigger the after save event.
-				$dispatcher->trigger($this->event_after_save, array($context, &$table, true));
-			}
-			else
-			{
-				throw new Exception($table->getError());
-			}
-		}
-
-		// Clean cache
-		$this->cleanCache();
-
-		return true;
 	}
 
 	/**
@@ -203,7 +153,7 @@ class TcModelContent extends JModelAdmin
 	{
 		jimport('joomla.filter.output');
 
-		if (empty($table->id))
+		if (empty($table->tc_id))
 		{
 			// Set ordering to the last item if not set
 			if (@$table->ordering === '')
@@ -217,91 +167,387 @@ class TcModelContent extends JModelAdmin
 	}
 
 	/**
-	 * Method to save the submitted ordering values for records via AJAX.
+	 * save a record (and redirect to main page)
 	 *
-	 * @param   INT  $user_id  user ID
+	 * @param   array  $data  TC form data
+	 *
+	 * @return void
+	 */
+	public function save($data)
+	{
+		require_once JPATH_ADMINISTRATOR . '/components/com_tc/models/urlpattern.php';
+		parent::save($data);
+		$db   = JFactory::getDBO();
+		$table = $this->getTable();
+		$key = $table->getKeyName();
+		$tcId = (!empty($data[$key])) ? $data[$key] : (int) $this->getState($this->getName() . '.id');
+		$client = $data['client'];
+		$url_pattern = $data['url_pattern'];
+
+		// Delete existing url patterns
+		$urlPatternModel = JModelLegacy::getInstance('urlpattern', 'TcModel');
+
+		$urlPatternIds = $urlPatternModel->getURLPatternIdList($tcId);
+
+		if (count($urlPatternIds))
+		{
+			foreach ($urlPatternIds as $patternId)
+			{
+				$deletePatternData = $urlPatternModel->delete($patternId->id);
+
+				if ($deletePatternData != 1)
+				{
+					return false;
+				}
+			}
+		}
+
+		// Save / Update URL patterns
+		$tcURLObj = array();
+
+		foreach ($url_pattern as $pattern)
+		{
+			$tcURLObj['id'] = '';
+			$tcURLObj['tc_id'] = $tcId;
+			$tcURLObj['client'] = $client;
+			$tcURLObj['option'] = $pattern['option'];
+			$tcURLObj['view'] = $pattern['view'];
+			$tcURLObj['params'] = '';
+
+			$patternData = $urlPatternModel->save($tcURLObj);
+
+			if ($patternData != 1)
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Method to check valid TC based on client & version values via AJAX.
+	 *
+	 * @param   STRING  $tcVersion  TC version
+	 * @param   STRING  $tcClient   TC client
 	 *
 	 * @return  void
 	 *
 	 * @since   3.0
 	 */
-	public function getUserTc($user_id)
+	public function checkDuplicateAndLatestVersionTC($tcVersion,$tcClient)
 	{
-		if ($user_id)
+		if ($tcVersion && $tcClient)
 		{
-			$db    = JFactory::getDBO();
+			$db = JFactory::getDbo();
 			$query = $db->getQuery(true);
-			$query->select('content_id');
-			$query->from($db->quoteName('#__tc_users') . 'as u');
-			$query->where('user_id = ' . $user_id);
+			$query->select('version');
+			$query->from($db->quoteName('#__tc_content'));
+			$query->where($db->quoteName('client') . " = " . $db->quote($tcClient));
+
 			$db->setQuery($query);
+			$getTCVersions = $db->loadObjectList();
 
-			$res = $db->loadResult();
+			$maxVersion = array();
 
-			return $res;
+			foreach ($getTCVersions as $TCVersions)
+			{
+				array_push($maxVersion, $TCVersions->version);
+			}
+
+			if ($getTCVersions)
+			{
+				if ($tcVersion <= max($maxVersion))
+				{
+					return max($maxVersion);
+				}
+				else
+				{
+					return true;
+				}
+			}
+			else
+			{
+				return 'newVersion';
+			}
 		}
 	}
 
 	/**
-	 * Method to save the submitted ordering values for records via AJAX.
+	 * Method to get latest matching TC id's based option and view parameters
 	 *
-	 * @param   INT  $client  client 
-	 * 
-	 * @return  void
+	 * @param   STRING  $option  component  option name
+	 * @param   STRING  $view    component view name
 	 *
-	 * @since   3.0
+	 * @return void
+	 *
+	 * @since  1.6
 	 */
-	public function getCurrentTc($client)
+	public function getMatchingTCs($option, $view)
 	{
-		if ($client)
+		$today = JHtml::date('now', 'Y-m-d H:i:s', true);
+
+		$db = JFactory::getDbo();
+		$query = $db->getQuery(true);
+		$query->select('p.tc_id, c.version, c.client');
+		$query->from($db->quoteName('#__tc_patterns', 'p'));
+		$query->join('LEFT', $db->quoteName('#__tc_content', 'c') . ' ON (' . $db->quoteName('c.tc_id') . ' = ' . $db->quoteName('p.tc_id') . ')');
+		$query->where($db->quoteName('p.option') . " = " . $db->quote($option));
+		$query->where($db->quoteName('p.view') . " = " . $db->quote($view));
+		$query->where($db->quoteName('c.start_date') . " <= " . $db->quote($today));
+		$query->where($db->quoteName('c.state') . " = " . $db->quote(1));
+
+		// Order in ascending, so get latest version of T&C
+		$orderCol  = 'c.version';
+		$orderDirn = 'asc';
+		$query->order($db->escape($orderCol . ' ' . $orderDirn));
+		$db->setQuery($query);
+
+		// Returns an associated array, it will give result with highest version number first for every client
+		$getMatchingTCIdList = $db->loadObjectList('client');
+
+		return $getMatchingTCIdList;
+	}
+
+	/**
+	 * Method to check accepeted TC ids & return not accepted TC ids to accept user
+	 *
+	 * @param   INT  $loggedInUserId  logged in used id
+	 * @param   INT  $tcId            TC id
+	 *
+	 * @return void
+	 *
+	 * @since  1.6
+	 */
+	public function hasUserAcceptedTC($loggedInUserId, $tcId)
+	{
+		// Get user accepted TC ids
+		$db = JFactory::getDBO();
+		$query = $db->getQuery(true);
+		$query->select('c.tc_id');
+		$query->from($db->quoteName('#__tc_content', 'c'));
+
+		$query->join('LEFT', $db->quoteName('#__tc_acceptance', 'a') . ' ON (' . $db->quoteName('c.tc_id') . ' = ' . $db->quoteName('a.tc_id') . ')');
+
+		$query->where($db->quoteName('a.user_id') . ' = ' . $loggedInUserId);
+
+		$db->setQuery($query);
+		$userAcceptedTCs = $db->loadObjectList();
+
+		$tcIdList = array();
+
+		foreach ($tcId as $key => $value)
 		{
-			$db    = JFactory::getDBO();
-			$query = $db->getQuery(true);
-			$query->select('id');
-			$query->from($db->quoteName('#__tc_content') . 'as u');
-			$query->where($db->quoteName('client') . ' = ' . $db->quote($client));
-			$query->where($db->quoteName('state') . ' = 1');
-			$query->order('id DESC');
-			$query->setLimit('1');
-			$db->setQuery($query);
+			unset($value->version);
+			unset($value->client);
 
-			$res = $db->loadObjectList();
+			array_push($tcIdList, $value);
+		}
 
-			return $res;
+		// Remove accepted TC ids from pattern matching TC ids
+		if (count($userAcceptedTCs))
+		{
+			foreach ($userAcceptedTCs as $key => $value)
+			{
+				if (($key = array_search($value, $tcIdList)) !== false)
+				{
+					unset($tcIdList[$key]);
+				}
+			}
+
+			$tcAcceptIdList = array_values($tcIdList);
+
+			return $tcAcceptIdList;
+		}
+		else
+		{
+			return $tcIdList;
 		}
 	}
 
 	/**
-	 * Method to save the submitted ordering values for records via AJAX.
-	 * 
-	 * @param   INT  $userid   user ID
-	 * @param   INT  $version  latest client version
+	 * Method to get TC User group, Global, Is Blacklist(user group behaviour) values
 	 *
-	 * @return  void
+	 * @param   INT  $tcId  TC id
 	 *
-	 * @since   3.0
+	 * @return void
+	 *
+	 * @since  1.6
 	 */
-	public function storeUserTc($userid, $version)
+	public function getTCValidationStatus($tcId)
 	{
-		if ($userid && $version)
+		$db = JFactory::getDbo();
+		$query = $db->getQuery(true);
+		$query->select('global,groups,is_blacklist');
+		$query->from($db->quoteName('#__tc_content'));
+		$query->where($db->quoteName('tc_id') . " = " . $db->quote($tcId));
+		$query->where($db->quoteName('state') . " = " . $db->quote(1));
+
+		$db->setQuery($query);
+		$TCValidationInfo = $db->loadObjectList();
+
+		if (!empty($TCValidationInfo))
 		{
-			$db                  = JFactory::getDBO();
+			// Check TC user groups access
+			$checkTCGroupAccess = $this->checkUserGroupAccess($TCValidationInfo[0]->groups, $TCValidationInfo[0]->is_blacklist);
 
-			// Load file to call api of the table
-			JTable::addIncludePath(JPATH_ADMINISTRATOR . '/components/com_tc/tables');
+			if ($checkTCGroupAccess == 1)
+			{
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+		else
+		{
+			return false;
+		}
+	}
 
-			// First parameter file name and second parameter is prefix
-			$users_table = JTable::getInstance('users', 'TcTable', array('dbo', $db));
+	/**
+	 * Method to check TC user group access
+	 *
+	 * @param   array  $tcUserGroup  TC groups
+	 * @param   INT    $isBlacklist  TC groups
+	 *
+	 * @return void
+	 *
+	 * @since  1.6
+	 */
+	public function checkUserGroupAccess($tcUserGroup,$isBlacklist)
+	{
+		$user = JFactory::getUser();
+		$loggedInUserId = $user->get('id');
+		$userGroups = JFactory::getUser($loggedInUserId);
 
-			// Get jlike_remider_sent for per reminder Check if already reminder sent to the User
-			$users_table->load(array('user_id' => (int) $userid));
-			$users_table->content_id       = $version;
-			$users_table->user_id          = $userid;
-			$date                          = JFactory::getDate('now');
-			$users_table->accepted_date    = $date->toSQL();
-			$users_table->store();
+		if ($loggedInUserId)
+		{
+			if (!empty($tcUserGroup))
+			{
+				if ($tcUserGroup && $isBlacklist == 1)
+				{
+					$explodeSavedTCGroup = explode(",", $tcUserGroup);
 
+					for ($j = 0; $j < count($explodeSavedTCGroup); $j++)
+					{
+						if (in_array($explodeSavedTCGroup[$j], $userGroups->groups))
+						{
+							return true;
+						}
+					}
+				}
+				elseif ($tcUserGroup && $isBlacklist == 0)
+				{
+					$explodeSavedTCGroup = explode(",", $tcUserGroup);
+
+					for ($j = 0; $j < count($explodeSavedTCGroup); $j++)
+					{
+						if (in_array($explodeSavedTCGroup[$j], $userGroups->groups))
+						{
+							// Avoid to show TC if stored groups is available in user groups[because is_blacklist is set to 0]
+						}
+						else
+						{
+							return true;
+						}
+					}
+				}
+			}
+			else
+			{
+				// If user group is empty then show TC to all users
+				return true;
+			}
+		}
+	}
+
+	/**
+	 * Method to get all global TC id's
+	 *
+	 * @return INT global TC id
+	 *
+	 * @since  1.6
+	 */
+	public function getGlobalTCIdList()
+	{
+		$today = JHtml::date('now', 'Y-m-d H:i:s', false);
+
+		$db = JFactory::getDbo();
+		$query = $db->getQuery(true);
+		$query->select('p.tc_id, c.version, c.client');
+		$query->from($db->quoteName('#__tc_patterns', 'p'));
+		$query->join('LEFT', $db->quoteName('#__tc_content', 'c') . ' ON (' . $db->quoteName('c.tc_id') . ' = ' . $db->quoteName('p.tc_id') . ')');
+		$query->where($db->quoteName('c.global') . " = " . $db->quote(1));
+		$query->where($db->quoteName('c.start_date') . " <= " . $db->quote($today));
+		$query->where($db->quoteName('c.state') . " = " . $db->quote(1));
+
+		// Order in ascending, so get latest version of T&C
+		$orderCol  = 'c.version';
+		$orderDirn = 'asc';
+		$query->order($db->escape($orderCol . ' ' . $orderDirn));
+		$db->setQuery($query);
+
+		// Returns an associated array, it will give result with highest version number first for every client
+		$globalTCIdList = $db->loadObjectList('client');
+
+		return $globalTCIdList;
+	}
+
+	/**
+	 * Method to get global TC validation status
+	 *
+	 * @param   INT  $tcId  TC id's
+	 *
+	 * @return INT global TC id
+	 *
+	 * @since  1.6
+	 */
+	public function getGlobalTCValidationStatus($tcId)
+	{
+		$db = JFactory::getDbo();
+		$query = $db->getQuery(true);
+		$query->select('groups,is_blacklist');
+		$query->from($db->quoteName('#__tc_content'));
+		$query->where($db->quoteName('tc_id') . " = " . $db->quote($tcId));
+
+		$db->setQuery($query);
+		$GlobalTCValidationStatus = $db->loadObjectList();
+
+		// Check TC user groups access
+		$checkGlobalTCGroupAccess = $this->checkUserGroupAccess($GlobalTCValidationStatus[0]->groups, $GlobalTCValidationStatus[0]->is_blacklist);
+
+		if ($checkGlobalTCGroupAccess == 1)
+		{
 			return true;
 		}
+		else
+		{
+			return false;
+		}
+	}
+
+	/**
+	 * Method to get T&C client name based on T&C id
+	 *
+	 * @param   INT  $tcId  tc id.
+	 *
+	 * @return  client name
+	 *
+	 * @since    1.6
+	 */
+	public function getTCClient($tcId)
+	{
+		$db = JFactory::getDbo();
+		$query = $db->getQuery(true);
+		$query->select('client');
+		$query->from($db->quoteName('#__tc_content'));
+		$query->where($db->quoteName('tc_id') . " = " . $db->quote($tcId));
+
+		$db->setQuery($query);
+		$TCClient = $db->loadResult();
+
+		return $TCClient;
 	}
 }

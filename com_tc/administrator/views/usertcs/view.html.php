@@ -76,31 +76,22 @@ class TcViewUsertcs extends JViewLegacy
 				JToolBarHelper::deleteList('', 'usertcs.delete', 'JTOOLBAR_DELETE');
 			}
 		}
-
-		if ($canDo->get('core.admin'))
-		{
-			JToolBarHelper::preferences('com_tc');
-		}
-
-		// Set sidebar action - New in 3.0
-		JHtmlSidebar::setAction('index.php?option=com_tc&view=usertcs');
-
-		$this->extra_sidebar = '';
 	}
 
 	/**
-	 * Method to order fields 
+	 * Method to order fields
 	 *
-	 * @return void 
+	 * @return void
 	 */
 	protected function getSortFields()
 	{
 		return array(
-			'a.`id`' => JText::_('JGRID_HEADING_ID'),
+			'a.`tc_id`' => JText::_('JGRID_HEADING_ID'),
 			'a.`user_id`' => JText::_('COM_TC_USERTCS_USERID'),
 			'uc.`name`' => JText::_('COM_TC_USERTCS_NAME'),
 			'u.`title`' => JText::_('COM_TC_USERTCS_TITLE'),
 			'a.`client`' => JText::_('COM_TC_USERTCS_CLIENT'),
+			'a.`version`' => JText::_('COM_TC_CONTENTS_VERSION'),
 			'a.`accepted_date`' => JText::_('COM_TC_USERTCS_ACCEPTED_DATE'),
 		);
 	}

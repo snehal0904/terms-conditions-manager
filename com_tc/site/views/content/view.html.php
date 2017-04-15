@@ -32,7 +32,7 @@ class TcViewContent extends JViewLegacy
 	{
 		$app        = JFactory::getApplication();
 		$input = JFactory::getApplication()->input;
-		$this->content_id = $input->get('content_id', '', 'INT');
+		$this->tc_id = $input->get('tc_id', '', 'INT');
 		$this->layout     = $input->get('layout', 'default', 'STRING');
 		$this->user_id    = JFactory::getUser()->id;
 
@@ -47,7 +47,7 @@ class TcViewContent extends JViewLegacy
 
 		// Call api to get user accepted version
 		$model                         = JModelLegacy::getInstance('Content', 'TcModel');
-		$this->termsandconditions            = $model->getItem($this->content_id);
+		$this->termsandconditions            = $model->getItem($this->tc_id);
 		parent::display($tpl);
 	}
 }

@@ -76,7 +76,6 @@ class TcViewContents extends JViewLegacy
 			if ($canDo->get('core.create'))
 			{
 				JToolBarHelper::addNew('content.add', 'JTOOLBAR_NEW');
-				JToolbarHelper::custom('contents.duplicate', 'copy.png', 'copy_f2.png', 'JTOOLBAR_DUPLICATE', true);
 			}
 
 			if ($canDo->get('core.edit') && isset($this->items[0]))
@@ -147,20 +146,33 @@ class TcViewContents extends JViewLegacy
 	}
 
 	/**
-	 * Method to order fields 
+	 * Method to order fields
 	 *
-	 * @return void 
+	 * @return void
 	 */
 	protected function getSortFields()
 	{
 		return array(
-			'a.`id`' => JText::_('JGRID_HEADING_ID'),
+			'a.`tc_id`' => JText::_('JGRID_HEADING_ID'),
 			'a.`ordering`' => JText::_('JGRID_HEADING_ORDERING'),
 			'a.`state`' => JText::_('JSTATUS'),
 			'a.`title`' => JText::_('COM_TC_CONTENTS_TITLE'),
 			'a.`version`' => JText::_('COM_TC_CONTENTS_VERSION'),
 			'a.`client`' => JText::_('COM_TC_CONTENTS_CLIENT'),
 			'a.`start_date`' => JText::_('COM_TC_CONTENTS_START_DATE'),
+		);
+	}
+
+	/**
+	 * Method to order fields
+	 *
+	 * @return void
+	 */
+	protected function getSortTCVersion()
+	{
+		return array(
+			'latest' => JText::_('COM_TC_CONTENTS_LATEST'),
+			'all' => JText::_('COM_TC_CONTENTS_ALL')
 		);
 	}
 }

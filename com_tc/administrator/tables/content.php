@@ -26,7 +26,7 @@ class TcTablecontent extends JTable
 	public function __construct(&$db)
 	{
 		JObserverMapper::addObserverClassToClass('JTableObserverContenthistory', 'TcTablecontent', array('typeAlias' => 'com_tc.content'));
-		parent::__construct('#__tc_content', 'id', $db);
+		parent::__construct('#__tc_content', 'tc_id', $db);
 	}
 
 	/**
@@ -45,51 +45,39 @@ class TcTablecontent extends JTable
 		$input = JFactory::getApplication()->input;
 		$task = $input->getString('task', '');
 
-		if ($array['id'] == 0)
+		if ($array['tc_id'] == 0)
 		{
 			$array['created_by'] = JFactory::getUser()->id;
+			$array['modified_by'] = JFactory::getUser()->id;
 		}
-
-		if ($array['id'] == 0)
+		else
 		{
 			$array['modified_by'] = JFactory::getUser()->id;
 		}
 
-		if (isset($array['params']) && is_array($array['params']))
+		// Implode users by comma separated, added by samadhan
+		if (!empty($array['groups']))
 		{
-			$registry = new JRegistry;
-			$registry->loadArray($array['params']);
-			$array['params'] = (string) $registry;
-		}
-
-		if (isset($array['metadata']) && is_array($array['metadata']))
-		{
-			$registry = new JRegistry;
-			$registry->loadArray($array['metadata']);
-			$array['metadata'] = (string) $registry;
-		}
-
-		if (!JFactory::getUser()->authorise('core.admin', 'com_tc.content.' . $array['id']))
-		{
-			$actions         = JAccess::getActionsFromFile(
-				JPATH_ADMINISTRATOR . '/components/com_tc/access.xml',
-				"/access/section[@name='content']/"
-			);
-			$default_actions = JAccess::getAssetRules('com_tc.content.' . $array['id'])->getData();
-			$array_jaccess   = array();
-
-			foreach ($actions as $action)
+			if (is_array($array['groups']))
 			{
-				$array_jaccess[$action->name] = $default_actions[$action->name];
+				$array['groups'] = implode(",", $array['groups']);
 			}
-
-			$array['rules'] = $this->JAccessRulestoArray($array_jaccess);
+		}
+		else
+		{
+			$array['groups'] = '';
 		}
 
-		// Bind the rules for ACL where supported.
-		if (isset($array['rules']) && is_array($array['rules']))
+		$currentDateTime = JHtml::date('now', 'Y-m-d H:i:s', true);
+
+		if ($array['tc_id'] == 0)
 		{
-			$this->setRules($array['rules']);
+			$array['created_on'] = $currentDateTime;
+			$array['modified_on'] = $currentDateTime;
+		}
+		else
+		{
+			$array['modified_on'] = $currentDateTime;
 		}
 
 		return parent::bind($array, $ignore);
@@ -132,7 +120,7 @@ class TcTablecontent extends JTable
 	public function check()
 	{
 		// If there is an ordering column and this is a new row then get the next ordering value
-		if (property_exists($this, 'ordering') && $this->id == 0)
+		if (property_exists($this, 'ordering') && $this->tc_id == 0)
 		{
 			$this->ordering = self::getNextOrder();
 		}
@@ -219,64 +207,5 @@ class TcTablecontent extends JTable
 		}
 
 		return true;
-	}
-
-	/**
-	 * Define a namespaced asset name for inclusion in the #__assets table
-	 *
-	 * @return string The asset name
-	 *
-	 * @see JTable::_getAssetName
-	 */
-	protected function _getAssetName()
-	{
-		$k = $this->_tbl_key;
-
-		return 'com_tc.content.' . (int) $this->$k;
-	}
-
-	/**
-	 * Returns the parent asset's id. If you have a tree structure, retrieve the parent's id using the external key field
-	 *
-	 * @param   JTable   $table  Table name
-	 * @param   integer  $id     Id
-	 *
-	 * @see JTable::_getAssetParentId
-	 *
-	 * @return mixed The id on success, false on failure.
-	 */
-	protected function _getAssetParentId(JTable $table = null, $id = null)
-	{
-		// We will retrieve the parent-asset from the Asset-table
-		$assetParent = JTable::getInstance('Asset');
-
-		// Default: if no asset-parent can be found we take the global asset
-		$assetParentId = $assetParent->getRootId();
-
-		// The item has the component as asset-parent
-		$assetParent->loadByName('com_tc');
-
-		// Return the found asset-parent-id
-		if ($assetParent->id)
-		{
-			$assetParentId = $assetParent->id;
-		}
-
-		return $assetParentId;
-	}
-
-	/**
-	 * Delete a record by id
-	 *
-	 * @param   mixed  $pk  Primary key value to delete. Optional
-	 *
-	 * @return bool
-	 */
-	public function delete($pk = null)
-	{
-		$this->load($pk);
-		$result = parent::delete($pk);
-
-		return $result;
 	}
 }

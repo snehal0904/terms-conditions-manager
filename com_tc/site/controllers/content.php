@@ -17,7 +17,7 @@ defined('_JEXEC') or die;
 class TcControllerContent extends JControllerForm
 {
 	/**
-	 * Method which will redirect to home page after accepted the Terms & conditions
+	 * Method which will redirect to T&C page after accepted the Terms & conditions
 	 *
 	 * @return void
 	 */
@@ -26,20 +26,21 @@ class TcControllerContent extends JControllerForm
 		$app        = JFactory::getApplication();
 		$input      = $app->input;
 
-		$user_id    = $input->get('user_id', '', 'INT');
-		$content_id = $input->get('content_id', '', 'INT');
+		$userId     = $input->get('user_id', '', 'INT');
+		$tcId 		= $input->get('tc_id', '', 'INT');
+		$returnURL 		= $input->get('return_url', '', 'STRING');
 
-		// Update #_tc_users table
+		// Add T&C accepted user entry in #_tc_acceptance table
+		require_once JPATH_ADMINISTRATOR . '/components/com_tc/models/usertcs.php';
 
-		require_once JPATH_ADMINISTRATOR . '/components/com_tc/models/content.php';
+		$model                      = JModelLegacy::getInstance('Usertcs', 'TcModel');
+		$storeUserEntryAndRedirect  = $model->save($userId, $tcId, $returnURL);
 
-		// Call api to get user accepted version
-		$model                         = JModelLegacy::getInstance('Content', 'TcModel');
-		$updatedsuccessfully           = $model->storeUserTc($user_id, $content_id);
+		$redirectURL = base64_decode($storeUserEntryAndRedirect);
 
 		$message = JText::_('COM_TC_LATEST_TERMSANDCONDITIONS_ACCEPTED');
 
-		// Redirect to Terms and condtitions view
-		$app->redirect(JRoute::_(JURI::base()), $message);
+		// Redirect to refresh page for accepting next T&C
+		$app->redirect(JRoute::_($redirectURL), $message, 'success');
 	}
 }

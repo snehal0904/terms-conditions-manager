@@ -22,39 +22,6 @@ use Joomla\Utilities\ArrayHelper;
 class TcControllerContents extends JControllerAdmin
 {
 	/**
-	 * Method to clone existing Contents
-	 *
-	 * @return void
-	 */
-	public function duplicate()
-	{
-		// Check for request forgeries
-		Jsession::checkToken() or jexit(JText::_('JINVALID_TOKEN'));
-
-		// Get id(s)
-		$pks = $this->input->post->get('cid', array(), 'array');
-
-		try
-		{
-			if (empty($pks))
-			{
-				throw new Exception(JText::_('COM_TC_NO_ELEMENT_SELECTED'));
-			}
-
-			ArrayHelper::toInteger($pks);
-			$model = $this->getModel();
-			$model->duplicate($pks);
-			$this->setMessage(Jtext::_('COM_TC_ITEMS_SUCCESS_DUPLICATED'));
-		}
-		catch (Exception $e)
-		{
-			JFactory::getApplication()->enqueueMessage($e->getMessage(), 'warning');
-		}
-
-		$this->setRedirect('index.php?option=com_tc&view=contents');
-	}
-
-	/**
 	 * Proxy for getModel.
 	 *
 	 * @param   string  $name    Optional. Model name
@@ -70,38 +37,5 @@ class TcControllerContents extends JControllerAdmin
 		$model = parent::getModel($name, $prefix, array('ignore_request' => true));
 
 		return $model;
-	}
-
-	/**
-	 * Method to save the submitted ordering values for records via AJAX.
-	 *
-	 * @return  void
-	 *
-	 * @since   3.0
-	 */
-	public function saveOrderAjax()
-	{
-		// Get the input
-		$input = JFactory::getApplication()->input;
-		$pks   = $input->post->get('cid', array(), 'array');
-		$order = $input->post->get('order', array(), 'array');
-
-		// Sanitize the input
-		ArrayHelper::toInteger($pks);
-		ArrayHelper::toInteger($order);
-
-		// Get the model
-		$model = $this->getModel();
-
-		// Save the ordering
-		$return = $model->saveorder($pks, $order);
-
-		if ($return)
-		{
-			echo "1";
-		}
-
-		// Close the application
-		JFactory::getApplication()->close();
 	}
 }
