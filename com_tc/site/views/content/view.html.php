@@ -36,18 +36,33 @@ class TcViewContent extends JViewLegacy
 		$this->layout     = $input->get('layout', 'default', 'STRING');
 		$this->user_id    = JFactory::getUser()->id;
 
-		if (!$this->user_id && $this->layout != 'terms')
-		{
-			$app->redirect(JRoute::_(JURI::base()));
-
-			return false;
-		}
-
-		require_once JPATH_ADMINISTRATOR . '/components/com_tc/models/content.php';
+		JLoader::import('components.com_tc.models.content', JPATH_ADMINISTRATOR);
 
 		// Call api to get user accepted version
-		$model                         = JModelLegacy::getInstance('Content', 'TcModel');
-		$this->termsandconditions            = $model->getItem($this->tc_id);
-		parent::display($tpl);
+		$model  = JModelLegacy::getInstance('Content', 'TcModel');
+
+		if ($this->user_id && $this->tc_id)
+		{
+			$userAcceptedTC = $model->userAcceptedTC($this->user_id, $this->tc_id);
+		}
+
+		if (empty($userAcceptedTC))
+		{
+				$this->layout     = $input->get('layout', 'default', 'STRING');
+
+				if (!$this->user_id && $this->layout != 'terms')
+				{
+					$app->redirect(JRoute::_(JURI::base()));
+
+					return false;
+				}
+
+				$this->termsandconditions            = $model->getItem($this->tc_id);
+				parent::display($tpl);
+		}
+		else
+		{
+			$app->redirect(JRoute::_(JURI::base()));
+		}
 	}
 }

@@ -472,7 +472,7 @@ class TcModelContent extends JModelAdmin
 	 */
 	public function getGlobalTCIdList()
 	{
-		$today = JHtml::date('now', 'Y-m-d H:i:s', false);
+		$today = JHtml::date('now', 'Y-m-d H:i:s', true);
 
 		$db = JFactory::getDbo();
 		$query = $db->getQuery(true);
@@ -549,5 +549,26 @@ class TcModelContent extends JModelAdmin
 		$TCClient = $db->loadResult();
 
 		return $TCClient;
+	}
+
+	/**
+	 * Method to check accepeted TC ids & return not accepted TC ids to accept user
+	 *
+	 * @param   INT  $loggedInUserId  logged in used id
+	 * @param   INT  $tcId            TC id
+	 *
+	 * @return void
+	 *
+	 * @since  1.6
+	 */
+	public function userAcceptedTC($loggedInUserId, $tcId)
+	{
+		if ($loggedInUserId && $tcId)
+		{
+		$table = $this->getTable('usertcs');
+		$table->load(['user_id' => $loggedInUserId, 'tc_id' => $tcId]);
+
+		return $table->tc_id;
+		}
 	}
 }

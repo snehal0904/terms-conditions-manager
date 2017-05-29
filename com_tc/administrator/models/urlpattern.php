@@ -97,7 +97,7 @@ class TcModelUrlpattern extends JModelAdmin
 	{
 		$db = JFactory::getDbo();
 		$query = $db->getQuery(true);
-		$query->select('id');
+		$query->select($db->quoteName(array('id')));
 		$query->from($db->quoteName('#__tc_patterns'));
 		$query->where($db->quoteName('tc_id') . " = " . $db->quote($tcId));
 

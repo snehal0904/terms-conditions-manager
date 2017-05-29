@@ -135,30 +135,33 @@ class TcModelContents extends JModelList
 				'list.select', 'DISTINCT a.*'
 			)
 		);
-		$query->from('`#__tc_content` AS a');
+		$query->from($db->quoteName('#__tc_content', 'a'));
 
 		// Join over the users for the checked out user
-		$query->select("uc.name AS editor");
-		$query->join("LEFT", "#__users AS uc ON uc.id=a.checked_out");
+		$query->select($db->quoteName(array('uc.name'), ('editor')));
+		$query->join("LEFT", $db->quoteName('#__users', 'uc') . 'ON (' . $db->quoteName('uc.id') . ' = ' .
+				$db->quoteName('a.checked_out') . ')');
 
 		// Join over the user field 'created_by'
 		$query->select('`created_by`.name AS `created_by`');
-		$query->join('LEFT', '#__users AS `created_by` ON `created_by`.id = a.`created_by`');
+		$query->join("LEFT", $db->quoteName('#__users', 'created_by') . 'ON (' . $db->quoteName('created_by.id') . ' = ' .
+				$db->quoteName('a.created_by') . ')');
 
 		// Join over the user field 'modified_by'
 		$query->select('`modified_by`.name AS `modified_by`');
-		$query->join('LEFT', '#__users AS `modified_by` ON `modified_by`.id = a.`modified_by`');
+		$query->join("LEFT", $db->quoteName('#__users', 'modified_by') . 'ON (' . $db->quoteName('modified_by.id') . ' = ' .
+				$db->quoteName('a.modified_by') . ')');
 
 		// Filter by published state
 		$published = $this->getState('filter.state');
 
 		if (is_numeric($published))
 		{
-			$query->where('a.state = ' . (int) $published);
+			$query->where($db->quoteName('a.state') . ' = ' . $db->quote((int) $published));
 		}
 		elseif ($published === '')
 		{
-			$query->where('(a.state IN (0, 1))');
+			$query->where($db->quoteName('a.state') . 'IN (0, 1)');
 		}
 
 		// Filter by search in title
