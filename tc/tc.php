@@ -92,7 +92,7 @@ class PlgSystemTc extends JPlugin
 				if ($isGlobalTCIdList == '1')
 				{
 					// If this is global TC and if this page is not be skipped, redirect to TC page
-					if ($option != 'com_tc' || $view != 'content' || $tc_id != $getGlobalTCAcceptIdList[$i]->tc_id)
+					if ($option != 'com_tc' && $view != 'content' && $tc_id != $getGlobalTCAcceptIdList[$i]->tc_id)
 					{
 						$tc_url = 'index.php?option=com_tc&view=content&tc_id=';
 
