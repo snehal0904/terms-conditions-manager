@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @version    SVN: <svn_id>
  * @package    Com_Tc
@@ -7,6 +6,7 @@
  * @copyright  Copyright (c) 2016-2017 TechJoomla. All rights reserved.
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
+
 // No direct access
 defined('_JEXEC') or die;
 

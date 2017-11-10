@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <extension type="component" version="3.0" method="upgrade">
-    <name>T&C Package</name>
+    <name>com_tc</name>
     <creationDate>10th November 2017</creationDate>
     <copyright>Copyright(C)2016-17 TechJoomla</copyright>
-    <license>http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL</license>
+    <license>GNU General Public License version 2 or later; see LICENSE.txt</license>
     <author>Techjoomla</author>
     <authorEmail>extensions@techjoomla.com</authorEmail>
     <authorUrl>www.techjoomla.com</authorUrl>
-    <version>1.0.1</version>
-    <description>This T&C manager is used to assign T&C's for any pages of site.</description>
+    <version>CVS: 1.0.1</version>
+    <description>This TC manager is used to assign TC's for any pages of site.</description>
+
+	<!-- The description is optional and defaults to the name -->
+	<description>COM_TC</description>
 	<scriptfile>script.tc.php</scriptfile>
 
     <install> <!-- Runs on install -->
