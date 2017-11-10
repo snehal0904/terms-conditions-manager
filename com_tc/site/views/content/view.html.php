@@ -48,17 +48,17 @@ class TcViewContent extends JViewLegacy
 
 		if (empty($userAcceptedTC))
 		{
-				$this->layout     = $input->get('layout', 'default', 'STRING');
+			$this->layout     = $input->get('layout', 'default', 'STRING');
 
-				if (!$this->user_id && $this->layout != 'terms')
-				{
-					$app->redirect(JRoute::_(JURI::base()));
+			if (!$this->user_id && $this->layout != 'terms')
+			{
+				$app->redirect(JRoute::_(JURI::base()));
 
-					return false;
-				}
+				return false;
+			}
 
-				$this->termsandconditions            = $model->getItem($this->tc_id);
-				parent::display($tpl);
+			$this->termsandconditions = $model->getItem($this->tc_id);
+			parent::display($tpl);
 		}
 		else
 		{

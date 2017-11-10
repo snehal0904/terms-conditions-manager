@@ -565,10 +565,10 @@ class TcModelContent extends JModelAdmin
 	{
 		if ($loggedInUserId && $tcId)
 		{
-		$table = $this->getTable('usertcs');
-		$table->load(['user_id' => $loggedInUserId, 'tc_id' => $tcId]);
+			$table = $this->getTable('usertcs');
+			$table->load(['user_id' => $loggedInUserId, 'tc_id' => $tcId]);
 
-		return $table->tc_id;
+			return $table->tc_id;
 		}
 	}
 }
