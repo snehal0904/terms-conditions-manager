@@ -1,10 +1,10 @@
 <?php
 
 /**
- * @version    CVS: 1.0.0
+ * @version    SVN: <svn_id>
  * @package    Com_Tc
- * @author     Parth Lawate <contact@techjoomla.com>
- * @copyright  2016 Parth Lawate
+ * @author     Techjoomla <extensions@techjoomla.com>
+ * @copyright  Copyright (c) 2016-2017 TechJoomla. All rights reserved.
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 // No direct access
@@ -46,23 +46,25 @@ class TcViewContent extends JViewLegacy
 			$userAcceptedTC = $model->userAcceptedTC($this->user_id, $this->tc_id);
 		}
 
-		if (empty($userAcceptedTC))
+		if ($userAcceptedTC)
 		{
+			// Redirect to Home page
+			$app->redirect(JRoute::_(JUri::base()));
+		}
+		else
+		{
+			// Redirect to T&C page
 			$this->layout     = $input->get('layout', 'default', 'STRING');
 
 			if (!$this->user_id && $this->layout != 'terms')
 			{
-				$app->redirect(JRoute::_(JURI::base()));
+				$app->redirect(JRoute::_(JUri::base()));
 
 				return false;
 			}
 
-			$this->termsandconditions = $model->getItem($this->tc_id);
+			$this->termsandconditions            = $model->getItem($this->tc_id);
 			parent::display($tpl);
-		}
-		else
-		{
-			$app->redirect(JRoute::_(JURI::base()));
 		}
 	}
 }

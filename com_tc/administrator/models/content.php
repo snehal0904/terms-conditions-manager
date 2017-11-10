@@ -552,23 +552,31 @@ class TcModelContent extends JModelAdmin
 	}
 
 	/**
-	 * Method to check accepeted TC ids & return not accepted TC ids to accept user
+	 * Method to check user has already T&C accepted or not. If accepted then redirect to Home page.
 	 *
 	 * @param   INT  $loggedInUserId  logged in used id
 	 * @param   INT  $tcId            TC id
 	 *
-	 * @return void
+	 * @return true/false
 	 *
 	 * @since  1.6
 	 */
-	public function userAcceptedTC($loggedInUserId, $tcId)
+	public function isUserAcceptedTC($loggedInUserId, $tcId)
 	{
 		if ($loggedInUserId && $tcId)
 		{
 			$table = $this->getTable('usertcs');
 			$table->load(['user_id' => $loggedInUserId, 'tc_id' => $tcId]);
 
-			return $table->tc_id;
+			// Return true if user has already accepted T&C else return false
+			if ($table->tc_id)
+			{
+				return true;
+			}
+			else
+			{
+				return false;
+			}
 		}
 	}
 }

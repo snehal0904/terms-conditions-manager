@@ -2,12 +2,9 @@
 /**
  * @version    SVN: <svn_id>
  * @package    Plg_System_Tc
- * @copyright  Copyright (C) 2015 - 2016. All rights reserved.
- * @license    GNU General Public License version 2 or later; see LICENSE.txt
- * Shika is free software. This version may have been modified pursuant
- * to the GNU General Public License, and as distributed it includes or
- * is derivative of works licensed under the GNU General Public License or
- * other free or open source software licenses.
+ * @author     Techjoomla <extensions@techjoomla.com>
+ * @copyright  Copyright (c) 2016-2017 TechJoomla. All rights reserved.
+ * @license    GNU General Public License version 2 or later.
  */
 
 // No direct access.
