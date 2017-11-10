@@ -43,7 +43,7 @@ class TcViewContent extends JViewLegacy
 
 		if ($this->user_id && $this->tc_id)
 		{
-			$userAcceptedTC = $model->userAcceptedTC($this->user_id, $this->tc_id);
+			$userAcceptedTC = $model->isUserAcceptedTC($this->user_id, $this->tc_id);
 		}
 
 		if ($userAcceptedTC)
