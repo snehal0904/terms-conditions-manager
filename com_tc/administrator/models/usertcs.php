@@ -1,12 +1,12 @@
 <?php
-
 /**
- * @version    CVS: 1.0.0
+ * @version    SVN: <svn_id>
  * @package    Com_Tc
- * @author     Parth Lawate <contact@techjoomla.com>
- * @copyright  2016 Parth Lawate
+ * @author     Techjoomla <extensions@techjoomla.com>
+ * @copyright  Copyright (c) 2016-2017 TechJoomla. All rights reserved.
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
+
 defined('_JEXEC') or die;
 
 jimport('joomla.application.component.modellist');
@@ -113,15 +113,15 @@ class TcModelUsertcs extends JModelList
 				'list.select', 'a.*,c.title,uc.name AS name,c.client,c.version'
 			)
 		);
-		$query->from('`#__tc_acceptance` AS a');
+		$query->from($db->quoteName('#__tc_acceptance', 'a'));
 
 		// Join over the user field 'created_by'
-		$query->join('LEFT', '#__tc_content AS `c` ON `c`.tc_id = a.`tc_id`');
+		$query->join('LEFT', $db->quoteName('#__tc_content', 'c') . 'ON(' . $db->quoteName('c.tc_id') . '=' . $db->quoteName('a.tc_id') . ')');
 
 		// Join over the users for the checked out user
-		$query->join("LEFT", "#__users AS uc ON uc.id=a.user_id");
+		$query->join("LEFT", $db->quoteName('#__users', 'uc') . 'ON (' . $db->quoteName('uc.id') . '=' . $db->quoteName('a.user_id') . ')');
 
-		$query->where('c.state=1');
+		$query->where($db->quoteName('c.state') . '=' . $db->quote('1'));
 
 		// Filter by search in title
 		$search = $this->getState('filter.search');
@@ -130,7 +130,7 @@ class TcModelUsertcs extends JModelList
 		{
 			if (stripos($search, 'tc_id:') === 0)
 			{
-				$query->where('a.tc_id = ' . (int) substr($search, 3));
+				$query->where($db->quoteName('a.tc_id') . ' = ' . $db->quote((int) substr($search, 3)));
 			}
 			else
 			{

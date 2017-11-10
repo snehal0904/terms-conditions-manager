@@ -1,9 +1,9 @@
 <?php
 /**
- * @version    CVS: 1.0.0
+ * @version    SVN: <svn_id>
  * @package    Com_Tc
- * @author     Parth Lawate <contact@techjoomla.com>
- * @copyright  2016 Parth Lawate
+ * @author     Techjoomla <extensions@techjoomla.com>
+ * @copyright  Copyright (c) 2016-2017 TechJoomla. All rights reserved.
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
@@ -97,7 +97,7 @@ class TcModelUrlpattern extends JModelAdmin
 	{
 		$db = JFactory::getDbo();
 		$query = $db->getQuery(true);
-		$query->select('id');
+		$query->select($db->quoteName(array('id')));
 		$query->from($db->quoteName('#__tc_patterns'));
 		$query->where($db->quoteName('tc_id') . " = " . $db->quote($tcId));
 

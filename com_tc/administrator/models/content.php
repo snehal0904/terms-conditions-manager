@@ -1,9 +1,9 @@
 <?php
 /**
- * @version    CVS: 1.0.0
+ * @version    SVN: <svn_id>
  * @package    Com_Tc
- * @author     Parth Lawate <contact@techjoomla.com>
- * @copyright  2016 Parth Lawate
+ * @author     Techjoomla <extensions@techjoomla.com>
+ * @copyright  Copyright (c) 2016-2017 TechJoomla. All rights reserved.
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
@@ -472,7 +472,7 @@ class TcModelContent extends JModelAdmin
 	 */
 	public function getGlobalTCIdList()
 	{
-		$today = JHtml::date('now', 'Y-m-d H:i:s', false);
+		$today = JHtml::date('now', 'Y-m-d H:i:s', true);
 
 		$db = JFactory::getDbo();
 		$query = $db->getQuery(true);
@@ -549,5 +549,34 @@ class TcModelContent extends JModelAdmin
 		$TCClient = $db->loadResult();
 
 		return $TCClient;
+	}
+
+	/**
+	 * Method to check user has already T&C accepted or not. If accepted then redirect to Home page.
+	 *
+	 * @param   INT  $loggedInUserId  logged in used id
+	 * @param   INT  $tcId            TC id
+	 *
+	 * @return true/false
+	 *
+	 * @since  1.6
+	 */
+	public function isUserAcceptedTC($loggedInUserId, $tcId)
+	{
+		if ($loggedInUserId && $tcId)
+		{
+			$table = $this->getTable('usertcs');
+			$table->load(['user_id' => $loggedInUserId, 'tc_id' => $tcId]);
+
+			// Return true if user has already accepted T&C else return false
+			if ($table->tc_id)
+			{
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
 	}
 }

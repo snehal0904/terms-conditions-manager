@@ -1,12 +1,12 @@
 <?php
-
 /**
- * @version    CVS: 1.0.0
+ * @version    SVN: <svn_id>
  * @package    Com_Tc
- * @author     Parth Lawate <contact@techjoomla.com>
- * @copyright  2016 Parth Lawate
+ * @author     Techjoomla <extensions@techjoomla.com>
+ * @copyright  Copyright (c) 2016-2017 TechJoomla. All rights reserved.
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
+
 // No direct access
 defined('_JEXEC') or die;
 
@@ -36,18 +36,35 @@ class TcViewContent extends JViewLegacy
 		$this->layout     = $input->get('layout', 'default', 'STRING');
 		$this->user_id    = JFactory::getUser()->id;
 
-		if (!$this->user_id && $this->layout != 'terms')
-		{
-			$app->redirect(JRoute::_(JURI::base()));
-
-			return false;
-		}
-
-		require_once JPATH_ADMINISTRATOR . '/components/com_tc/models/content.php';
+		JLoader::import('components.com_tc.models.content', JPATH_ADMINISTRATOR);
 
 		// Call api to get user accepted version
-		$model                         = JModelLegacy::getInstance('Content', 'TcModel');
-		$this->termsandconditions            = $model->getItem($this->tc_id);
-		parent::display($tpl);
+		$model  = JModelLegacy::getInstance('Content', 'TcModel');
+
+		if ($this->user_id && $this->tc_id)
+		{
+			$userAcceptedTC = $model->isUserAcceptedTC($this->user_id, $this->tc_id);
+		}
+
+		if ($userAcceptedTC)
+		{
+			// Redirect to Home page
+			$app->redirect(JRoute::_(JUri::base()));
+		}
+		else
+		{
+			// Redirect to T&C page
+			$this->layout     = $input->get('layout', 'default', 'STRING');
+
+			if (!$this->user_id && $this->layout != 'terms')
+			{
+				$app->redirect(JRoute::_(JUri::base()));
+
+				return false;
+			}
+
+			$this->termsandconditions            = $model->getItem($this->tc_id);
+			parent::display($tpl);
+		}
 	}
 }

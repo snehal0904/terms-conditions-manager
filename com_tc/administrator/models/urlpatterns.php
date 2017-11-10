@@ -1,12 +1,12 @@
 <?php
-
 /**
- * @version    CVS: 1.0.0
+ * @version    SVN: <svn_id>
  * @package    Com_Tc
- * @author     Parth Lawate <contact@techjoomla.com>
- * @copyright  2016 Parth Lawate
+ * @author     Techjoomla <extensions@techjoomla.com>
+ * @copyright  Copyright (c) 2016-2017 TechJoomla. All rights reserved.
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
+
 defined('_JEXEC') or die;
 
 jimport('joomla.application.component.modellist');
@@ -92,7 +92,8 @@ class TcModelUrlpatterns extends JModelList
 	protected function getListQuery()
 	{
 		// Get TC id for retrieving url patterns
-		$tcId = JRequest::getVar('tc_id');
+		$input = JFactory::getApplication()->input;
+		$tcId = $input->get('tc_id', '', 'int');
 
 		// Create a new query object.
 		$db    = $this->getDbo();
@@ -104,11 +105,11 @@ class TcModelUrlpatterns extends JModelList
 				'list.select', '*'
 			)
 		);
-		$query->from('#__tc_patterns');
+		$query->from($db->quoteName('#__tc_patterns'));
 
 		if ($tcId)
 		{
-			$query->where('tc_id = ' . $tcId);
+			$query->where($db->quoteName('tc_id') . ' = ' . $db->quote($tcId));
 		}
 
 		return $query;
