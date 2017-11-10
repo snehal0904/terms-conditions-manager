@@ -36,7 +36,7 @@ defined('_JEXEC') or die('Restricted access');
 			<br>
 			<div class="">
 				<?php
-						echo nl2br(htmlspecialchars($this->termsandconditions->content, ENT_COMPAT, 'UTF-8'));
+						echo nl2br($this->termsandconditions->content);
 		 } ?>
 			</div>
 <?php
