@@ -20,7 +20,7 @@ jimport('joomla.plugin.plugin');
  *
  * @since  1.0.0
  */
-class PlgSystemTc extends JPlugin
+class PlgSystemplug_System_Tc extends JPlugin
 {
 	public $app;
 
