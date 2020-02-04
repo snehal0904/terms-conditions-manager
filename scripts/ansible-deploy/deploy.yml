@@ -1,0 +1,17 @@
+---
+- hosts: "hosts"
+  vars:
+    workspace: "{{ lookup('env','WORKSPACE') }}"
+  tasks:
+  - name: Copy packages to tmp folder
+    copy:
+      src: "{{ workspace | default('') }}/{{ item }}"
+      dest: "{{ doc_root }}/tmp"
+      owner: "{{ server_runs_as }}"
+      group: "{{ server_runs_as_group }}"
+    with_items:
+     - "{{ artifact_list }}"
+
+  - shell: "{{ php_executable }} {{ doc_root}}/cli/install-extension.php -f {{ doc_root }}/tmp/{{item}}"
+    with_items:
+     - "{{ artifact_list }}"

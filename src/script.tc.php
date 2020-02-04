@@ -10,13 +10,40 @@
 // No direct access to this file
 defined('_JEXEC') or die('Restricted access');
 
+$tjInstallerPath = JPATH_ROOT . '/administrator/manifests/packages/tc/tjinstaller.php';
+
+if (File::exists(__DIR__ . '/tjinstaller.php'))
+{
+	include_once __DIR__ . '/tjinstaller.php';
+}
+elseif (File::exists($tjInstallerPath))
+{
+	include_once $tjInstallerPath;
+}
+
 /**
  * Script file of activitystream component
  *
  * @since  0.0.1
  */
-class Com_TcInstallerScript
+class Com_TcInstallerScript extends TJInstaller
 {
+	protected $extensionName = 'com_tc';
+
+	/** @var array The list of extra modules and plugins to install */
+	private $installationQueue = array(
+		// Plugins => { (folder) => { (element) => (published) }* }*
+		'plugins' => array(
+			'system' => array(
+				'tc' => 1
+			)
+		)
+	);
+
+	protected $extensionsToEnable = array (
+	// 0 - type, 1 - name, 2 - publish?, 3 - client, 4 - group, 5 - position
+	array ('plugin', 'tc', 1, 1, 'system', ''));
+
 	/**
 	 * method to install the component
 	 *
@@ -26,6 +53,8 @@ class Com_TcInstallerScript
 	 */
 	public function install($parent)
 	{
+		// Enable the extensions on fresh install
+		$this->enableExtensions();
 	}
 
 	/**
@@ -37,6 +66,10 @@ class Com_TcInstallerScript
 	 */
 	public function uninstall($parent)
 	{
+		// Uninstall subextensions
+		$status = $this->uninstallSubextensions($parent);
+
+		return $status;
 	}
 
 	/**
@@ -73,6 +106,14 @@ class Com_TcInstallerScript
 	 */
 	public function postflight($type, $parent)
 	{
+		// Copy tjinstaller file into packages folder
+		$this->copyInstaller($parent);
+
+		// Install subextensions
+		$status = $this->installSubextensions($parent);
+
+		// Show the post-installation page
+		$this->renderPostInstallation($status);
 	}
 
 	/**
@@ -124,5 +165,20 @@ class Com_TcInstallerScript
 				}
 			}
 		}
+	}
+
+	/**
+	 * Method to copy installer file
+	 *
+	 * @param   JInstaller  $parent  Class calling this method
+	 *
+	 * @return  void
+	 */
+	protected function copyInstaller($parent)
+	{
+		$src  = $parent->getParent()->getPath('source') . '/tjinstaller.php';
+		$dest = JPATH_ROOT . '/administrator/manifests/packages/tc/tjinstaller.php';
+
+		File::copy($src, $dest);
 	}
 }
