@@ -10,39 +10,22 @@
 // No direct access to this file
 defined('_JEXEC') or die('Restricted access');
 
-$tjInstallerPath = JPATH_ROOT . '/administrator/manifests/packages/tc/tjinstaller.php';
-
-if (File::exists(__DIR__ . '/tjinstaller.php'))
-{
-	include_once __DIR__ . '/tjinstaller.php';
-}
-elseif (File::exists($tjInstallerPath))
-{
-	include_once $tjInstallerPath;
-}
-
 /**
  * Script file of activitystream component
  *
  * @since  0.0.1
  */
-class Com_TcInstallerScript extends TJInstaller
+class Com_TcInstallerScript
 {
-	protected $extensionName = 'com_tc';
-
 	/** @var array The list of extra modules and plugins to install */
-	private $installationQueue = array(
+	private $queue = array(
 		// Plugins => { (folder) => { (element) => (published) }* }*
 		'plugins' => array(
 			'system' => array(
-				'tc' => 1
+				'plug_system_tc' => 1
 			)
 		)
 	);
-
-	protected $extensionsToEnable = array (
-	// 0 - type, 1 - name, 2 - publish?, 3 - client, 4 - group, 5 - position
-	array ('plugin', 'tc', 1, 1, 'system', ''));
 
 	/**
 	 * method to install the component
@@ -66,8 +49,43 @@ class Com_TcInstallerScript extends TJInstaller
 	 */
 	public function uninstall($parent)
 	{
-		// Uninstall subextensions
-		$status = $this->uninstallSubextensions($parent);
+		jimport('joomla.installer.installer');
+		$db              = JFactory::getDbo();
+		$status          = new JObject;
+		$status->plugins = array();
+
+		// Plugins uninstallation
+		if (count($this->queue['plugins']))
+		{
+			foreach ($this->queue['plugins'] as $folder => $plugins)
+			{
+				if (count($plugins))
+				{
+					foreach ($plugins as $plugin => $published)
+					{
+						$sql = $db->getQuery(true)->select($db->qn('extension_id'))
+						->from($db->qn('#__extensions'))
+						->where($db->qn('type') . ' = ' . $db->q('plugin'))
+						->where($db->qn('element') . ' = ' . $db->q($plugin))
+						->where($db->qn('folder') . ' = ' . $db->q($folder));
+						$db->setQuery($sql);
+
+						$id = $db->loadResult();
+
+						if ($id)
+						{
+							$installer         = new JInstaller;
+							$result            = $installer->uninstall('plugin', $id);
+							$status->plugins[] = array(
+								'name' => 'plg_' . $plugin,
+								'group' => $folder,
+								'result' => $result
+							);
+						}
+					}
+				}
+			}
+		}
 
 		return $status;
 	}
@@ -106,14 +124,73 @@ class Com_TcInstallerScript extends TJInstaller
 	 */
 	public function postflight($type, $parent)
 	{
-		// Copy tjinstaller file into packages folder
-		$this->copyInstaller($parent);
+		$src = $parent->getParent()->getPath('source');
+		$db = JFactory::getDbo();
+		$status = new JObject;
+		$status->plugins = array();
 
-		// Install subextensions
-		$status = $this->installSubextensions($parent);
+		// Plugins installation
+		if (count($this->queue['plugins']))
+		{
+			foreach ($this->queue['plugins'] as $folder => $plugins)
+			{
+				if (count($plugins))
+				{
+					foreach ($plugins as $plugin => $published)
+					{
+						$path = "$src/plugins/$folder/$plugin";
 
-		// Show the post-installation page
-		$this->renderPostInstallation($status);
+						if (!is_dir($path))
+						{
+							$path = "$src/plugins/$folder/plg_$plugin";
+						}
+
+						if (!is_dir($path))
+						{
+							$path = "$src/plugins/$plugin";
+						}
+
+						if (!is_dir($path))
+						{
+							$path = "$src/plugins/plg_$plugin";
+						}
+
+						if (!is_dir($path))
+						{
+							continue;
+						}
+
+						// Was the plugin already installed?
+						$query = $db->getQuery(true)
+							->select('COUNT(*)')
+							->from($db->qn('#__extensions'))
+							->where($db->qn('element') . ' = ' . $db->q($plugin))
+							->where($db->qn('folder') . ' = ' . $db->q($folder));
+						$db->setQuery($query);
+						$count = $db->loadResult();
+
+						$installer = new JInstaller;
+						$result = $installer->install($path);
+
+					$status->plugins[] = array('name' => 'plg_' . $plugin, 'group' => $folder, 'result' => $result);
+
+						if ($published && !$count)
+						{
+							$query = $db->getQuery(true)
+								->update($db->qn('#__extensions'))
+								->set($db->qn('enabled') . ' = ' . $db->q('1'))
+								->where($db->qn('element') . ' = ' . $db->q($plugin))
+								->where($db->qn('folder') . ' = ' . $db->q($folder));
+							$db->setQuery($query);
+							$db->execute();
+						}
+					}
+				}
+			}
+		}
+
+		// Install SQL FIles
+		$this->installSqlFiles($parent);
 	}
 
 	/**
@@ -165,20 +242,5 @@ class Com_TcInstallerScript extends TJInstaller
 				}
 			}
 		}
-	}
-
-	/**
-	 * Method to copy installer file
-	 *
-	 * @param   JInstaller  $parent  Class calling this method
-	 *
-	 * @return  void
-	 */
-	protected function copyInstaller($parent)
-	{
-		$src  = $parent->getParent()->getPath('source') . '/tjinstaller.php';
-		$dest = JPATH_ROOT . '/administrator/manifests/packages/tc/tjinstaller.php';
-
-		File::copy($src, $dest);
 	}
 }
