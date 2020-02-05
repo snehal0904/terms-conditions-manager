@@ -39,6 +39,9 @@ class TcViewUsertcs extends JViewLegacy
 		$this->state = $this->get('State');
 		$this->items = $this->get('Items');
 		$this->pagination = $this->get('Pagination');
+		$this->component = $this->state->get('filter.component');
+		$this->filterForm    = $this->get('FilterForm');
+		$this->activeFilters = $this->get('ActiveFilters');
 
 		// Check for errors.
 		if (count($errors = $this->get('Errors')))
@@ -66,7 +69,7 @@ class TcViewUsertcs extends JViewLegacy
 		$state = $this->get('State');
 		$canDo = TcHelpersTc::getActions();
 
-		JToolBarHelper::title(JText::_('COM_TC_TITLE_USERTCS'), 'usertcs.png');
+		JToolBarHelper::title(JText::_('COM_TC_TITLE_USERTCS'), 'list');
 
 		if ($canDo->get('core.edit.state'))
 		{
@@ -76,23 +79,5 @@ class TcViewUsertcs extends JViewLegacy
 				JToolBarHelper::deleteList('', 'usertcs.delete', 'JTOOLBAR_DELETE');
 			}
 		}
-	}
-
-	/**
-	 * Method to order fields
-	 *
-	 * @return void
-	 */
-	protected function getSortFields()
-	{
-		return array(
-			'a.`tc_id`' => JText::_('JGRID_HEADING_ID'),
-			'a.`user_id`' => JText::_('COM_TC_USERTCS_USERID'),
-			'uc.`name`' => JText::_('COM_TC_USERTCS_NAME'),
-			'u.`title`' => JText::_('COM_TC_USERTCS_TITLE'),
-			'a.`client`' => JText::_('COM_TC_USERTCS_CLIENT'),
-			'a.`version`' => JText::_('COM_TC_CONTENTS_VERSION'),
-			'a.`accepted_date`' => JText::_('COM_TC_USERTCS_ACCEPTED_DATE'),
-		);
 	}
 }

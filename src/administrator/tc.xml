@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <extension type="component" version="3.0" method="upgrade">
     <name>com_tc</name>
-    <creationDate>2016-10-24</creationDate>
-    <copyright>2016 Parth Lawate</copyright>
+    <creationDate>10th November 2017</creationDate>
+    <copyright>Copyright(C)2016-17 TechJoomla</copyright>
     <license>GNU General Public License version 2 or later; see LICENSE.txt</license>
-    <author>Parth Lawate</author>
-    <authorEmail>contact@techjoomla.com</authorEmail>
-    <authorUrl>http://techjoomla.com</authorUrl>
-    <version>CVS: 1.0.0</version>
-    <description></description>
+    <author>Techjoomla</author>
+    <authorEmail>extensions@techjoomla.com</authorEmail>
+    <authorUrl>www.techjoomla.com</authorUrl>
+    <version>1.0.0</version>
+    <description>This TC manager is used to assign TC's for any pages of site.</description>
 
 	<!-- The description is optional and defaults to the name -->
 	<description>COM_TC</description>

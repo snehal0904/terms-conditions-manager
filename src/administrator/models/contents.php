@@ -71,6 +71,9 @@ class TcModelContents extends JModelList
 		$published = $app->getUserStateFromRequest($this->context . '.filter.state', 'filter_published', '', 'string');
 		$this->setState('filter.state', $published);
 
+		$client = $app->getUserStateFromRequest($this->context . '.filter.client', 'filter_client', '', 'string');
+		$this->setState('filter.client', $client);
+
 		$show = $app->getUserStateFromRequest($this->context . '.filter.show', 'filter_show', 'latest', 'string');
 		$this->setState('filter.show', $show);
 
@@ -154,6 +157,7 @@ class TcModelContents extends JModelList
 
 		// Filter by published state
 		$published = $this->getState('filter.state');
+		$client = $this->getState('filter.client');
 
 		if (is_numeric($published))
 		{
@@ -162,6 +166,11 @@ class TcModelContents extends JModelList
 		elseif ($published === '')
 		{
 			$query->where($db->quoteName('a.state') . 'IN (0, 1)');
+		}
+
+		if (!empty($client))
+		{
+			$query->where($db->quoteName('a.client') . ' = ' . $db->quote($client));
 		}
 
 		// Filter by search in title

@@ -64,6 +64,9 @@ class TcModelUsertcs extends JModelList
 		$search = $app->getUserStateFromRequest($this->context . '.filter.search', 'filter_search');
 		$this->setState('filter.search', $search);
 
+		$client = $app->getUserStateFromRequest($this->context . '.filter.client', 'filter_client', '', 'string');
+		$this->setState('filter.client', $client);
+
 		// Load the parameters.
 		$params = JComponentHelper::getParams('com_tc');
 		$this->setState('params', $params);
@@ -137,6 +140,13 @@ class TcModelUsertcs extends JModelList
 				$search = $db->Quote('%' . $db->escape($search, true) . '%');
 				$query->where('( c.title LIKE ' . $search . '  OR  c.client LIKE ' . $search . '  OR  uc.name LIKE ' . $search . ')');
 			}
+		}
+
+		$client = $this->getState('filter.client');
+
+		if (!empty($client))
+		{
+			$query->where($db->quoteName('c.client') . ' = ' . $db->quote($client));
 		}
 
 		// Add the list ordering clause.

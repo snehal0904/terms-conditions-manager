@@ -184,7 +184,6 @@ JHtml::_('behavior.formvalidator');
 					echo $this->form->renderField('groups');
 					echo $this->form->renderField('is_blacklist');
 					echo $this->form->renderField('global');
-					echo $this->form->renderField('enforce_delay_days');
 				?>
 				</fieldset>
 			</div>
