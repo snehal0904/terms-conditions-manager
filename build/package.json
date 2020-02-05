@@ -2,16 +2,14 @@
     "package_name": "com_tc",
     "core_files": {
         "src": "./terms-conditions-manager/src/*",
-        "dest": "builds/"
     },
     "subextensions": [
         {
             "name": "com_tc",
             "repoUrl": "git@github.com:techjoomla/terms-conditions-manager.git",
             "src": "./terms-conditions-manager/src/*",
-            "dest": "builds/com_tc/",
-            "zip_name": "com_tc",
-            "format": "zip"
+            "dest": "builds/",
+            "format": "folder"
         },
         {
             "name": "tjinstaller",
