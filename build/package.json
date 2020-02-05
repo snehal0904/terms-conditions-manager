@@ -2,6 +2,7 @@
     "package_name": "com_tc",
     "core_files": {
         "src": "./terms-conditions-manager/src/*",
+        "dest": "builds/"
     },
     "subextensions": [
         {
