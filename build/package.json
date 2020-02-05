@@ -11,23 +11,12 @@
             "src": "./terms-conditions-manager/src/*",
             "dest": "builds/",
             "format": "folder"
-        },
-        {
-            "name": "tjinstaller",
-            "repoUrl": "git@git.tekdi.net:techjoomla/tjinstaller.git",
-            "src": "./tjinstaller/src/*",
-            "dest": "builds/",
-            "format": "folder"
         }
     ],
     "versions": {
 		"1.0.0":{
             "com_tc": {
                 "version": "1.0.0",
-                "branch": "master"
-            },
-            "tjinstaller": {
-                "version": "1.1.0",
                 "branch": "master"
             }
         }
