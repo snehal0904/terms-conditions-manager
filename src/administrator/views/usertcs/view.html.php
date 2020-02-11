@@ -25,9 +25,11 @@ class TcViewUsertcs extends JViewLegacy
 
 	protected $state;
 
-	protected $filterForm;
+	public $filterForm;
 
 	protected $activeFilters;
+
+	protected $component;
 
 	/**
 	 * Display the view

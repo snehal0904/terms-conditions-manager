@@ -28,11 +28,13 @@ class TcViewContents extends JViewLegacy
 
 	protected $user;
 
-	protected $filterForm;
+	public $filterForm;
 
 	protected $activeFilters;
 
 	protected $extra_sidebar;
+
+	protected $component;
 
 	/**
 	 * Display the view
