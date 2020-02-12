@@ -11,6 +11,7 @@
 defined('_JEXEC') or die;
 
 jimport('joomla.application.component.view');
+use Joomla\CMS\Factory;
 
 /**
  * View class for a list of Tc.
@@ -25,6 +26,16 @@ class TcViewContents extends JViewLegacy
 
 	protected $state;
 
+	protected $user;
+
+	public $filterForm;
+
+	protected $activeFilters;
+
+	protected $extra_sidebar;
+
+	protected $component;
+
 	/**
 	 * Display the view
 	 *
@@ -38,7 +49,11 @@ class TcViewContents extends JViewLegacy
 	{
 		$this->state = $this->get('State');
 		$this->items = $this->get('Items');
+		$this->user  = Factory::getUser();
 		$this->pagination = $this->get('Pagination');
+		$this->component = $this->state->get('filter.component');
+		$this->filterForm    = $this->get('FilterForm');
+		$this->activeFilters = $this->get('ActiveFilters');
 
 		// Check for errors.
 		if (count($errors = $this->get('Errors')))
@@ -66,7 +81,7 @@ class TcViewContents extends JViewLegacy
 		$state = $this->get('State');
 		$canDo = TcHelpersTc::getActions();
 
-		JToolBarHelper::title(JText::_('COM_TC_TITLE_CONTENTS'), 'contents.png');
+		JToolBarHelper::title(JText::_('COM_TC_TITLE_CONTENTS'), 'list');
 
 		// Check if the form exists before showing the add/edit buttons
 		$formPath = JPATH_COMPONENT_ADMINISTRATOR . '/views/content';
@@ -134,45 +149,5 @@ class TcViewContents extends JViewLegacy
 		JHtmlSidebar::setAction('index.php?option=com_tc&view=contents');
 
 		$this->extra_sidebar = '';
-		JHtmlSidebar::addFilter(
-
-			JText::_('JOPTION_SELECT_PUBLISHED'),
-
-			'filter_published',
-
-			JHtml::_('select.options', JHtml::_('jgrid.publishedOptions'), "value", "text", $this->state->get('filter.state'), true)
-
-		);
-	}
-
-	/**
-	 * Method to order fields
-	 *
-	 * @return void
-	 */
-	protected function getSortFields()
-	{
-		return array(
-			'a.`tc_id`' => JText::_('JGRID_HEADING_ID'),
-			'a.`ordering`' => JText::_('JGRID_HEADING_ORDERING'),
-			'a.`state`' => JText::_('JSTATUS'),
-			'a.`title`' => JText::_('COM_TC_CONTENTS_TITLE'),
-			'a.`version`' => JText::_('COM_TC_CONTENTS_VERSION'),
-			'a.`client`' => JText::_('COM_TC_CONTENTS_CLIENT'),
-			'a.`start_date`' => JText::_('COM_TC_CONTENTS_START_DATE'),
-		);
-	}
-
-	/**
-	 * Method to order fields
-	 *
-	 * @return void
-	 */
-	protected function getSortTCVersion()
-	{
-		return array(
-			'latest' => JText::_('COM_TC_CONTENTS_LATEST'),
-			'all' => JText::_('COM_TC_CONTENTS_ALL')
-		);
 	}
 }

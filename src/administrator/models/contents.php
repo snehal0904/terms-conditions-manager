@@ -31,16 +31,16 @@ class TcModelContents extends JModelList
 		if (empty($config['filter_fields']))
 		{
 			$config['filter_fields'] = array(
-				'tc_id', 'a.`tc_id`',
-				'ordering', 'a.`ordering`',
-				'state', 'a.`state`',
-				'created_by', 'a.`created_by`',
-				'modified_by', 'a.`modified_by`',
-				'title', 'a.`title`',
-				'version', 'a.`version`',
-				'client', 'a.`client`',
-				'start_date', 'a.`start_date`',
-				'content', 'a.`content`',
+				'tc_id', 'a.tc_id',
+				'ordering', 'a.ordering',
+				'state', 'a.state',
+				'created_by', 'a.created_by',
+				'modified_by', 'a.modified_by',
+				'title', 'a.title',
+				'version', 'a.version',
+				'client', 'a.client',
+				'start_date', 'a.start_date',
+				'content', 'a.content'
 			);
 		}
 
@@ -59,27 +59,20 @@ class TcModelContents extends JModelList
 	 *
 	 * @throws Exception
 	 */
-	protected function populateState($ordering = null, $direction = null)
+	protected function populateState($ordering = 'a.tc_id', $direction = 'DESC')
 	{
 		// Initialise variables.
 		$app = JFactory::getApplication('administrator');
 
-		// Load the filter state.
-		$search = $app->getUserStateFromRequest($this->context . '.filter.search', 'filter_search');
-		$this->setState('filter.search', $search);
+		if ($filters = $app->getUserStateFromRequest($this->context . '.filter', 'filter', array(), 'array'))
+		{
+			foreach ($filters as $name => $value)
+			{
+				$this->setState('filter.' . $name, $value);
+			}
+		}
 
-		$published = $app->getUserStateFromRequest($this->context . '.filter.state', 'filter_published', '', 'string');
-		$this->setState('filter.state', $published);
-
-		$show = $app->getUserStateFromRequest($this->context . '.filter.show', 'filter_show', 'latest', 'string');
-		$this->setState('filter.show', $show);
-
-		// Load the parameters.
-		$params = JComponentHelper::getParams('com_tc');
-		$this->setState('params', $params);
-
-		// List state information.
-		parent::populateState('a.title', 'asc');
+		parent::populateState($ordering, $direction);
 	}
 
 	/**
@@ -154,6 +147,7 @@ class TcModelContents extends JModelList
 
 		// Filter by published state
 		$published = $this->getState('filter.state');
+		$client = $this->getState('filter.client');
 
 		if (is_numeric($published))
 		{
@@ -162,6 +156,11 @@ class TcModelContents extends JModelList
 		elseif ($published === '')
 		{
 			$query->where($db->quoteName('a.state') . 'IN (0, 1)');
+		}
+
+		if (!empty($client))
+		{
+			$query->where($db->quoteName('a.client') . ' = ' . $db->quote($client));
 		}
 
 		// Filter by search in title
@@ -182,12 +181,21 @@ class TcModelContents extends JModelList
 		}
 
 		// Add the list ordering clause.
-		$orderCol  = $this->state->get('list.ordering');
-		$orderDirn = $this->state->get('list.direction');
+		$orderCol  = $this->state->get('list.ordering', 'a.tc_id');
+		$orderDirn = $this->state->get('list.direction', 'DESC');
 
 		if ($orderCol && $orderDirn)
 		{
 			$query->order($db->escape($orderCol . ' ' . $orderDirn));
+		}
+
+		// Get ordering
+		$fullorderCol = $this->state->get('list.fullordering', 'a.tc_id DESC');
+
+		// Apply ordering
+		if (!empty($fullorderCol))
+		{
+			$query->order($db->escape($fullorderCol));
 		}
 
 		return $query;
