@@ -9,6 +9,8 @@
 
 // No direct access to this file
 defined('_JEXEC') or die('Restricted access');
+use Joomla\CMS\Installer\Installer;
+use Joomla\CMS\Filesystem\File;
 
 $tjInstallerPath = JPATH_ROOT . '/administrator/manifests/packages/tc/tjinstaller.php';
 
@@ -26,17 +28,19 @@ elseif (File::exists($tjInstallerPath))
  *
  * @since  0.0.1
  */
-class Com_TcInstallerScript extends TJInstaller
+class Pkg_TcInstallerScript extends TJInstaller
 {
-	protected $extensionName = 'com_tc';
+	protected $extensionName = 'tc';
 
 	/** @var array The list of extra modules and plugins to install */
 	private $installationQueue = array(
+		'postflight' => array(
 		// Plugins => { (folder) => { (element) => (published) }* }*
 		'plugins' => array(
 			'system' => array(
-				'tc' => 1
+				'plug_system_tc' => 1
 			)
+		)
 		)
 	);
 

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="package" version="3.0" method="upgrade">
+  <name>Terms and Condition manager</name>
+  <packagename>tc</packagename>
+  <packager>Techjoomla</packager>
+  <packagerurl>https://techjoomla.com</packagerurl>
+  <creationDate>10th Feb 2020</creationDate>
+  <copyright>Copyright (C) 2016 - 2020 Techjoomla. All rights reserved.</copyright>
+  <license>GNU General Public License version 2 or later; see LICENSE.txt</license>
+  <author>Techjoomla</author>
+  <authorEmail>extensions@techjoomla.com</authorEmail>
+  <authorUrl>https://techjoomla.com/</authorUrl>
+  <version>1.0.1</version>
+  <description>This TC manager is used to assign TC's for any pages of site.</description>
+  <!-- The description is optional and defaults to the name -->
+  <description>COM_TC</description>
+  <scriptfile>script.pkg_tc.php</scriptfile>
+  <blockChildUninstall>true</blockChildUninstall>
+  <files>
+    <!-- Component -->
+    <file type="component" id="com_tc">components/com_tc.zip</file>
+    <!-- Plugins -->
+    <file type="plugin" id="plug_system_tc" group="system">plugins/system/plug_system_tc.zip</file>
+  </files>
+  <updateservers>
+    <server type="collection" priority="1" name="tc"><![CDATA[https://techjoomla.com/updates/stream/tc.xml?format=xml]]></server>
+  </updateservers>
+</extension>
