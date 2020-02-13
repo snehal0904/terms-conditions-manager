@@ -9,6 +9,14 @@
             "name": "com_tc",
             "repoUrl": "git@github.com:techjoomla/terms-conditions-manager.git",
             "src": "./terms-conditions-manager/src/*",
+            "dest": "builds/com_tc/",
+            "zip_name": "com_tc",
+            "format": "zip"
+        },
+        {
+            "name": "tjinstaller",
+            "repoUrl": "git@git.tekdi.net:techjoomla/tjinstaller.git",
+            "src": "./tjinstaller/src/*",
             "dest": "builds/",
             "format": "folder"
         }
@@ -18,7 +26,10 @@
             "com_tc": {
                 "version": "1.0.0",
                 "branch": "master"
-            }
+            },
+            "tjinstaller": {
+                "version": "1.1.0",
+                "branch": "master"
         }
     }
 }
