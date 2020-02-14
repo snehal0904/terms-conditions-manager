@@ -1,5 +1,5 @@
 {
-    "package_name": "com_tc",
+    "package_name": "pkg_tc",
     "core_files": {
         "src": "./terms-conditions-manager/src/*",
         "dest": "builds/"
@@ -8,9 +8,17 @@
         {
             "name": "com_tc",
             "repoUrl": "git@github.com:techjoomla/terms-conditions-manager.git",
-            "src": "./terms-conditions-manager/src/*",
-            "dest": "builds/com_tc/",
+            "src": "./terms-conditions-manager/src/components/com_tc/*",
+            "dest": "builds/pkg_tc/components/",
             "zip_name": "com_tc",
+            "format": "zip"
+        },
+        {
+            "name": "plugins",
+            "repoUrl": "git@github.com:techjoomla/terms-conditions-manager.git",
+            "src": "./terms-conditions-manager/src/plugins/system/plug_system_tc/*",
+            "dest": "builds/pkg_tc/plugins/",
+            "zip_name": "plug_system_tc",
             "format": "zip"
         },
         {
